@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - SIT
+      - PROD
   pull_request:
     branches:
       - PROD
