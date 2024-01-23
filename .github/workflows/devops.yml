@@ -38,11 +38,10 @@ jobs:
 
       - name: Run static type checks
         shell: bash
-        # TEST remove `--exit-code 0` to force the pipeline build to fail if static type check discrepancies are found
         run: |
           pip install mypy --quiet
           pip install -r requirements.txt --quiet
-          mypy $(git ls-files "*.py") --exit-code 0
+          mypy $(git ls-files "*.py")
 
   pytest:
     runs-on: ubuntu-latest
