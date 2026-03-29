@@ -73,7 +73,7 @@ jobs:
       - name: Generate code coverage report
         shell: bash
         run: |
-          pip install pytest-cov coveralls --quiet
+          pip install -r requirements.txt pytest-cov coveralls --quiet
           pytest --cov tests/ --cov-report html:coverage/coverage_report/ --cov-config coverage/.coveragerc
 
       - name: Upload code coverage report to Coveralls
