@@ -57,7 +57,7 @@ jobs:
       - name: Run unit tests
         shell: bash
         run: |
-          pip install pytest --quiet
+          pip install -r requirements.txt pytest --quiet
           pytest tests/ --quiet
 
   pytest-cov:
