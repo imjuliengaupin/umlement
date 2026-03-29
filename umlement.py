@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
+from pathlib import Path
 import shutil
 import sys
 from colorama import (init, deinit, Fore, Style)
@@ -20,6 +20,13 @@ class UMLement():
     def generate_class_inheritance_diagram(self):
         self.generator.generate_class_inheritance_diagram()
 
+    def _append_python_path(self, path: Path) -> None:
+        if path.is_file() and path.suffix.lower() == ".py":
+            self.generator.py_files.append(str(path))
+            return
+
+        print(rf"{Fore.LIGHTBLACK_EX}{path} ignored, non-python files are unsupported{Style.RESET_ALL}")
+
     def validate_argvs_provided(self, argvs_provided: list[str]) -> bool:
         min_argvs_required: int = 1
 
@@ -28,24 +35,21 @@ class UMLement():
             print(f"{Fore.RED}an insufficient # of script arguments were provided (provided: {len(argvs_provided)}, expected: {min_argvs_required}){Style.RESET_ALL}")
             return False
 
-        # nested function to append `.py` files to the `UMLGenerator.py_files` list
-        def append_py_file(file_path: str) -> None:
-            self.generator.py_files.append(file_path) if bool(file_path.lower().endswith(".py")) else print(rf"{Fore.LIGHTBLACK_EX}{file_path} ignored, non-python files are unsupported{Style.RESET_ALL}")
+        self.generator.py_files = []
 
         for argv in argvs_provided:
-            # check if the script argv provided is a file or folder path
-            is_folder_path: bool = True if '.' not in argv else False
+            path = Path(argv)
 
-            if is_folder_path:
-                folder_path: str = argv
+            if not path.exists():
+                print(f"{Fore.RED}{path} not found{Style.RESET_ALL}")
+                continue
 
-                for file in os.listdir(folder_path):
-                    path: str = f"{folder_path}/{file}"
-                    append_py_file(path)
+            if path.is_dir():
+                for file_path in sorted(path.iterdir()):
+                    self._append_python_path(file_path)
+                continue
 
-            else:
-                file_path: str = argv
-                append_py_file(file_path)
+            self._append_python_path(path)
 
         # check if atleast 1 index in the self.generator.py_files list contains a `.py` file
         if len(self.generator.py_files) < 1:
@@ -85,5 +89,5 @@ if __name__ == "__main__":
         print(f"{Fore.RED}class inheritance model & diagram creation failed: {e}{Style.RESET_ALL}")
 
         # remove the directory containing any partically created `.puml` model and/or `.png` diagram files
-        if os.path.exists(PLANTUML_MODEL_DIR):
+        if Path(PLANTUML_MODEL_DIR).exists():
             shutil.rmtree(f"{PLANTUML_MODEL_DIR}")
