@@ -4,13 +4,21 @@ from dataclasses import dataclass, field
 
 
 @dataclass
+class UMLRelationship:
+    source: str
+    target: str
+    kind: str
+    via: str | None = None
+
+
+@dataclass
 class UMLClass:
     name: str
     package: str
     bases: list[str] = field(default_factory=list)
     attributes: list[str] = field(default_factory=list)
     methods: list[str] = field(default_factory=list)
-    relationships: list[str] = field(default_factory=list)
+    relationships: list[UMLRelationship] = field(default_factory=list)
 
 
 @dataclass

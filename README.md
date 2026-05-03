@@ -149,7 +149,8 @@ python umlement.py demo --recursive --format svg --progress
 ## :gear: Features
 
 - AST-backed class discovery for more robust Python project scanning
-- inheritance and object-instantiation relationship extraction
+- import-aware sibling module inclusion for more useful project-level reverse engineering
+- richer relationship extraction, including inheritance, has-a composition, and uses edges
 - rendered output as PNG or SVG
 - recursive folder scanning
 - mixed input support across folders and explicit Python files
@@ -199,8 +200,8 @@ make docs
 This project is still intentionally lightweight.
 
 Current tradeoffs:
-- analysis is stronger now that class discovery is AST-backed, but it is still intentionally lightweight rather than a full semantic analyzer
-- relationship extraction is best on straightforward object-oriented Python patterns
+- analysis is stronger now that class discovery is AST-backed and sibling imports can be auto-included, but it is still intentionally lightweight rather than a full semantic analyzer
+- relationship extraction is best on straightforward object-oriented Python patterns and local import graphs
 - this is best positioned as a practical reverse-engineering tool, not a full type-aware architecture engine
 
 ## Demo

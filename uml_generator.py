@@ -6,7 +6,7 @@ from pathlib import Path
 
 from constants import OUTPUT_DIR, PLANTUML_MODEL_NAME, RESOURCES_DIR
 from uml_ast import parse_python_file
-from uml_model import UMLClass, UMLModel
+from uml_model import UMLClass, UMLModel, UMLRelationship
 from umlement_progress import ProgressReporter
 
 
@@ -29,7 +29,28 @@ class UMLGenerator:
             raise Exception("no .jar file found in the resources directory, please add and try again")
         return f"{RESOURCES_DIR}/{jars[0]}"
 
+    def _expand_import_neighbor_files(self) -> None:
+        discovered = set(self.py_files)
+        added = True
+        while added:
+            added = False
+            for py_file in list(discovered):
+                file_path = Path(py_file)
+                source = file_path.read_text(encoding="utf-8")
+                for sibling in file_path.parent.glob("*.py"):
+                    module_name = sibling.stem
+                    if sibling == file_path:
+                        continue
+                    if f"from {module_name} import" in source or f"import {module_name}" in source:
+                        resolved = str(sibling.resolve())
+                        if resolved not in discovered:
+                            discovered.add(resolved)
+                            self.progress.info("Auto-included imported module", resolved)
+                            added = True
+        self.py_files = sorted(discovered)
+
     def build_model(self) -> UMLModel:
+        self._expand_import_neighbor_files()
         model = UMLModel()
         for py_file in self.py_files:
             self.progress.info("Scanning file", py_file)
@@ -42,7 +63,10 @@ class UMLGenerator:
                         bases=item.bases,
                         attributes=item.attributes,
                         methods=[method.name for method in item.methods],
-                        relationships=item.relationships,
+                        relationships=[
+                            UMLRelationship(source=item.name, target=relationship.target, kind=relationship.kind, via=relationship.via)
+                            for relationship in item.relationships
+                        ],
                     )
                 )
         return model
@@ -74,15 +98,24 @@ class UMLGenerator:
                         plantuml_file.write(f"{uml_class.name} : +{method}()\n")
                 plantuml_file.write("}\n\n")
 
+            emitted_relationships: set[tuple[str, str, str, str | None]] = set()
             for uml_class in model.classes:
                 for base in uml_class.bases:
                     base_name = base.split(".")[-1]
                     if base_name and base_name != "object":
                         plantuml_file.write(f"{base_name} <|-- {uml_class.name}\n")
                 for relationship in uml_class.relationships:
-                    relationship_name = relationship.split(".")[-1]
-                    if relationship_name in known_classes and relationship_name != uml_class.name:
-                        plantuml_file.write(f"{uml_class.name} -- {relationship_name}\n")
+                    if relationship.target not in known_classes or relationship.target == uml_class.name:
+                        continue
+                    key = (relationship.source, relationship.target, relationship.kind, relationship.via)
+                    if key in emitted_relationships:
+                        continue
+                    emitted_relationships.add(key)
+                    if relationship.kind == "has-a":
+                        label = f" : has-a ({relationship.via})" if relationship.via else " : has-a"
+                        plantuml_file.write(f"{relationship.source} *-- {relationship.target}{label}\n")
+                    else:
+                        plantuml_file.write(f"{relationship.source} ..> {relationship.target} : uses\n")
 
             plantuml_file.write("@enduml\n")
 

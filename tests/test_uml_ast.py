@@ -30,4 +30,22 @@ def test_parse_python_file_extracts_classes_and_relationships(tmp_path: Path) ->
     assert names == {"Base", "Friend", "Child"}
     assert child.bases == ["Base"]
     assert "friend" in child.attributes
-    assert "Friend" in child.relationships
+    assert any(rel.target == "Friend" and rel.kind == "has-a" and rel.via == "friend" for rel in child.relationships)
+
+
+def test_parse_python_file_resolves_imported_class_names(tmp_path: Path) -> None:
+    helper = tmp_path / "helper.py"
+    consumer = tmp_path / "consumer.py"
+    helper.write_text("class Helper(object):\n    pass\n", encoding="utf-8")
+    consumer.write_text(
+        "from helper import Helper\n\n"
+        "class Consumer(object):\n"
+        "    def __init__(self):\n"
+        "        self.helper = Helper()\n",
+        encoding="utf-8",
+    )
+
+    classes = parse_python_file(consumer)
+    consumer_class = next(item for item in classes if item.name == "Consumer")
+
+    assert any(rel.target == "Helper" for rel in consumer_class.relationships)
