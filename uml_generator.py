@@ -4,13 +4,15 @@ import subprocess
 from pathlib import Path
 from constants import OUTPUT_DIR, PLANTUML_MODEL_NAME, RESOURCES_DIR
 from uml_regex import UMLRegex
+from umlement_progress import ProgressReporter
 
 
 class UMLGenerator():
 
-    def __init__(self) -> None:
+    def __init__(self, progress: ProgressReporter | None = None) -> None:
         self.py_files: list[str] = []
         self.py_scanner: UMLRegex = UMLRegex()
+        self.progress = progress or ProgressReporter(enabled=False)
         self.class_name: str = ""
         self.classes: list[str] = []
         self.class_attributes: dict[str, list[str]] = {}
@@ -42,6 +44,7 @@ class UMLGenerator():
 
     def generate_class_inheritance_diagram(self, output_format: str = "png") -> Path:
         """execute PlantUML to generate a diagram from the generated model"""
+        self.progress.advance("Rendering diagram", f"output format: {output_format}")
         plantuml_jar = self._get_plantuml_jar_path()
         plantuml_model = str(self.get_output_model_path())
         plantuml_format = output_format.lower().lstrip(".")
@@ -56,11 +59,14 @@ class UMLGenerator():
         if result.returncode != 0:
             raise Exception(result.stderr.strip() or result.stdout.strip() or "PlantUML diagram generation failed")
 
-        return self.get_output_diagram_path(f".{plantuml_format}")
+        output_path = self.get_output_diagram_path(f".{plantuml_format}")
+        self.progress.info("Diagram render complete", str(output_path))
+        return output_path
 
     def generate_class_inheritance_model(self) -> Path:
         """scan the collected Python files and generate a PlantUML model"""
 
+        self.progress.advance("Preparing model generation", f"{len(self.py_files)} Python file(s) queued")
         self.reset_state()
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         output_model_path = self.get_output_model_path()
@@ -71,6 +77,7 @@ class UMLGenerator():
             plantuml_file.write("hide empty members\n\n")
 
             for i, py_file in enumerate(self.py_files):
+                self.progress.info("Scanning file", py_file)
                 self.write_class_packages_uml_notation(plantuml_file, i)
                 self.python_code_scan(plantuml_file, py_file)
                 self.write_class_attributes_uml_notation(plantuml_file)
@@ -78,6 +85,7 @@ class UMLGenerator():
             self.write_class_relationships_uml_notation(plantuml_file)
             plantuml_file.write("@enduml\n")
 
+        self.progress.info("PlantUML model ready", str(output_model_path))
         return output_model_path
 
     def python_code_scan(self, plantuml_file: io.TextIOWrapper, py_file: str) -> None:

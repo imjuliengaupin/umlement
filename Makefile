@@ -17,7 +17,7 @@ docs:
 	. .venv/bin/activate && pdoc --force --html $$(find . -maxdepth 1 -name '*.py' -print) --output-dir docs/
 
 demo:
-	. .venv/bin/activate && python umlement.py demo --recursive --format svg
+	. .venv/bin/activate && python umlement.py demo --recursive --format svg --progress
 
 clean:
 	rm -rf .pytest_cache .mypy_cache models docs/*.html docs/*/*.html

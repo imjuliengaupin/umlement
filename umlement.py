@@ -12,11 +12,13 @@ from colorama import Fore, Style, deinit, init
 
 from constants import OUTPUT_DIR, SUPPORTED_OUTPUT_FORMATS
 from uml_generator import UMLGenerator
+from umlement_progress import ProgressReporter
 
 
 class UMLement:
-    def __init__(self) -> None:
-        self.generator: UMLGenerator = UMLGenerator()
+    def __init__(self, progress_enabled: bool = False) -> None:
+        self.progress = ProgressReporter(enabled=progress_enabled)
+        self.generator: UMLGenerator = UMLGenerator(progress=self.progress)
 
     def generate_class_inheritance_model(self) -> Path:
         return self.generator.generate_class_inheritance_model()
@@ -29,8 +31,10 @@ class UMLement:
             resolved = str(path.resolve())
             if resolved not in self.generator.py_files:
                 self.generator.py_files.append(resolved)
+                self.progress.info("Queued Python file", resolved)
             return
 
+        self.progress.info("Ignored unsupported path", str(path))
         print(rf"{Fore.LIGHTBLACK_EX}{path} ignored, non-python files are unsupported{Style.RESET_ALL}")
 
     def validate_argvs_provided(self, argvs_provided: list[str], recursive: bool = False) -> bool:
@@ -43,16 +47,20 @@ class UMLement:
             )
             return False
 
+        self.progress.start("Validating input paths")
         self.generator.py_files = []
 
         for argv in argvs_provided:
             path = Path(argv).expanduser()
 
             if not path.exists():
+                self.progress.info("Missing path", str(path))
                 print(f"{Fore.RED}{path} not found{Style.RESET_ALL}")
                 continue
 
             if path.is_dir():
+                mode = "recursive" if recursive else "top-level"
+                self.progress.info("Scanning directory", f"{path} ({mode})")
                 iterator = sorted(path.rglob("*.py") if recursive else path.iterdir())
                 for file_path in iterator:
                     self._append_python_path(file_path)
@@ -64,6 +72,7 @@ class UMLement:
             print(f"{Fore.RED}no .py files found{Style.RESET_ALL}")
             return False
 
+        self.progress.complete("Input validation complete", f"{len(self.generator.py_files)} Python file(s) ready")
         return True
 
 
@@ -91,6 +100,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Generate the PlantUML model without rendering an image",
     )
     parser.add_argument(
+        "--progress",
+        action="store_true",
+        help="Show step-by-step status output while running",
+    )
+    parser.add_argument(
         "--version",
         action="version",
         version="UMLement 0.2.0",
@@ -103,20 +117,23 @@ def main(argv: list[str] | None = None) -> int:
     init()
 
     try:
-        script = UMLement()
+        script = UMLement(progress_enabled=args.progress)
         argvs_validated = script.validate_argvs_provided(args.paths, recursive=args.recursive)
 
         if not argvs_validated:
             raise ValueError("input validation failed")
 
+        script.progress.advance("Generating PlantUML model")
         model_path = script.generate_class_inheritance_model()
         print(f"{Fore.CYAN}PlantUML model created: {model_path}{Style.RESET_ALL}")
 
         if args.model_only:
+            script.progress.complete("Run complete", "model-only execution")
             print(f"{Fore.GREEN}model generation complete, diagram rendering skipped{Style.RESET_ALL}")
             return 0
 
         diagram_path = script.generate_class_inheritance_diagram(output_format=args.format)
+        script.progress.complete("Run complete", f"diagram available at {diagram_path}")
         print(f"{Fore.GREEN}diagram created successfully: {diagram_path}{Style.RESET_ALL}")
         return 0
 

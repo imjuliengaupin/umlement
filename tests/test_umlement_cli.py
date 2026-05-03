@@ -66,9 +66,10 @@ class TestValidateArgvsProvided:
 class TestCliSurface:
     def test_build_parser_supports_model_only_flag(self) -> None:
         parser = build_parser()
-        args = parser.parse_args(["demo", "--model-only"])
+        args = parser.parse_args(["demo", "--model-only", "--progress"])
 
         assert args.model_only is True
+        assert args.progress is True
         assert args.format == "png"
 
     def test_main_returns_failure_for_missing_path(self) -> None:

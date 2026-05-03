@@ -79,11 +79,11 @@ Fastest demo path:
 make demo
 ```
 
-Manual run:
+Manual run with visible progress output:
 
 ```sh
 . .venv/bin/activate
-python umlement.py demo --recursive --format svg
+python umlement.py demo --recursive --format svg --progress
 ```
 
 That generates:
@@ -122,11 +122,18 @@ python umlement.py demo --recursive --format svg
 python umlement.py demo --recursive --model-only
 ```
 
+### Show step-by-step status while it runs
+
+```sh
+python umlement.py demo --recursive --format svg --progress
+```
+
 ## :gear: Features
 
 - class inheritance diagram generation using PlantUML
 - rendered output as PNG or SVG
 - recursive folder scanning
+- step-by-step terminal progress output for demos
 - CLI help/version support
 - local demo assets for quick showcase runs
 - lightweight CI for linting, type checking, tests, coverage, and docs
