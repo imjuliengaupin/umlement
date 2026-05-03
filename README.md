@@ -79,6 +79,13 @@ Fastest demo path:
 make demo
 ```
 
+Tiny local UI:
+
+```sh
+make ui
+```
+Then open <http://127.0.0.1:5000>.
+
 Manual run with visible progress output:
 
 ```sh
@@ -134,6 +141,7 @@ python umlement.py demo --recursive --format svg --progress
 - rendered output as PNG or SVG
 - recursive folder scanning
 - step-by-step terminal progress output for demos
+- tiny local web UI with run controls, progress log, and SVG preview
 - CLI help/version support
 - local demo assets for quick showcase runs
 - lightweight CI for linting, type checking, tests, coverage, and docs
@@ -169,6 +177,7 @@ Useful commands:
 make setup
 make test
 make demo
+make ui
 make docs
 ```
 

@@ -16,8 +16,8 @@ from umlement_progress import ProgressReporter
 
 
 class UMLement:
-    def __init__(self, progress_enabled: bool = False) -> None:
-        self.progress = ProgressReporter(enabled=progress_enabled)
+    def __init__(self, progress_enabled: bool = False, progress: ProgressReporter | None = None) -> None:
+        self.progress = progress or ProgressReporter(enabled=progress_enabled)
         self.generator: UMLGenerator = UMLGenerator(progress=self.progress)
 
     def generate_class_inheritance_model(self) -> Path:

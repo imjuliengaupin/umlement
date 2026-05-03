@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UMLement Viewer</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b1020;
+        --panel: #131a2b;
+        --panel-2: #0f1524;
+        --text: #edf2ff;
+        --muted: #94a3b8;
+        --accent: #60a5fa;
+        --accent-2: #34d399;
+        --border: rgba(148, 163, 184, 0.18);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        background: linear-gradient(180deg, #0b1020 0%, #0f172a 100%);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 32px 20px 40px;
+      }
+      .hero {
+        margin-bottom: 20px;
+      }
+      .hero h1 {
+        margin: 0;
+        font-size: 32px;
+      }
+      .hero p {
+        color: var(--muted);
+        max-width: 760px;
+        line-height: 1.6;
+      }
+      .grid {
+        display: grid;
+        gap: 20px;
+        grid-template-columns: 360px minmax(0, 1fr);
+      }
+      .panel {
+        background: rgba(19, 26, 43, 0.92);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 18px 48px rgba(2, 6, 23, 0.35);
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      input, select {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--panel-2);
+        color: var(--text);
+        padding: 12px 14px;
+        margin-bottom: 14px;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+      .row > div { flex: 1; }
+      .checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+        color: var(--muted);
+      }
+      .checkbox input {
+        width: auto;
+        margin: 0;
+      }
+      button {
+        width: 100%;
+        border: 0;
+        border-radius: 12px;
+        padding: 13px 16px;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--accent), #818cf8);
+        color: white;
+        cursor: pointer;
+      }
+      button:disabled {
+        cursor: wait;
+        opacity: 0.7;
+      }
+      .log {
+        margin-top: 16px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: #0a1120;
+        padding: 14px;
+        min-height: 240px;
+        max-height: 420px;
+        overflow: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .log-line { margin-bottom: 10px; }
+      .log-detail { color: var(--muted); margin-top: 2px; }
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .toolbar a {
+        color: var(--accent);
+        text-decoration: none;
+        font-size: 14px;
+      }
+      .viewer {
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: white;
+        min-height: 720px;
+        overflow: hidden;
+      }
+      .viewer iframe {
+        width: 100%;
+        height: 720px;
+        border: 0;
+        background: white;
+      }
+      .empty {
+        min-height: 720px;
+        display: grid;
+        place-items: center;
+        color: #334155;
+        background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+        text-align: center;
+        padding: 32px;
+      }
+      .status {
+        color: var(--muted);
+        font-size: 14px;
+        margin-top: 10px;
+      }
+      @media (max-width: 980px) {
+        .grid { grid-template-columns: 1fr; }
+        .viewer, .viewer iframe, .empty { min-height: 540px; height: 540px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="hero">
+        <h1>UMLement Viewer</h1>
+        <p>
+          A tiny local UI for running UMLement, watching progress, and previewing the generated diagram.
+          It stays intentionally small, but makes the project feel much more interactive in a live demo.
+        </p>
+      </div>
+
+      <div class="grid">
+        <section class="panel">
+          <label for="path">Path to scan</label>
+          <input id="path" type="text" value="{{ default_path }}">
+
+          <div class="row">
+            <div>
+              <label for="format">Output format</label>
+              <select id="format">
+                <option value="svg" selected>SVG</option>
+                <option value="png">PNG</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="checkbox">
+            <input id="recursive" type="checkbox" checked>
+            <span>Scan recursively</span>
+          </label>
+
+          <label class="checkbox">
+            <input id="modelOnly" type="checkbox">
+            <span>Model only</span>
+          </label>
+
+          <button id="runButton">Generate diagram</button>
+          <div id="status" class="status">Ready for a local demo run.</div>
+
+          <div id="log" class="log"></div>
+        </section>
+
+        <section class="panel">
+          <div class="toolbar">
+            <strong>Diagram preview</strong>
+            <div>
+              <a id="svgLink" href="#" target="_blank" hidden>Open artifact</a>
+              <a id="pumlLink" href="#" target="_blank" hidden>Open model</a>
+            </div>
+          </div>
+          <div id="viewer" class="viewer">
+            <div class="empty">Run UMLement to generate a diagram preview here.</div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      const runButton = document.getElementById('runButton');
+      const pathInput = document.getElementById('path');
+      const recursiveInput = document.getElementById('recursive');
+      const modelOnlyInput = document.getElementById('modelOnly');
+      const formatInput = document.getElementById('format');
+      const log = document.getElementById('log');
+      const status = document.getElementById('status');
+      const viewer = document.getElementById('viewer');
+      const svgLink = document.getElementById('svgLink');
+      const pumlLink = document.getElementById('pumlLink');
+
+      function renderLog(lines) {
+        log.innerHTML = '';
+        if (!lines.length) {
+          log.textContent = 'No run output yet.';
+          return;
+        }
+        for (const line of lines) {
+          const row = document.createElement('div');
+          row.className = 'log-line';
+          row.textContent = line.label;
+          if (line.detail) {
+            const detail = document.createElement('div');
+            detail.className = 'log-detail';
+            detail.textContent = line.detail;
+            row.appendChild(detail);
+          }
+          log.appendChild(row);
+        }
+        log.scrollTop = log.scrollHeight;
+      }
+
+      function renderViewer(diagramUrl) {
+        if (!diagramUrl) {
+          viewer.innerHTML = '<div class="empty">Model-only run completed. No rendered diagram to preview.</div>';
+          return;
+        }
+        viewer.innerHTML = `<iframe src="${diagramUrl}"></iframe>`;
+      }
+
+      runButton.addEventListener('click', async () => {
+        runButton.disabled = true;
+        status.textContent = 'Running UMLement...';
+        renderLog([]);
+        viewer.innerHTML = '<div class="empty">Generating diagram...</div>';
+        svgLink.hidden = true;
+        pumlLink.hidden = true;
+
+        try {
+          const response = await fetch('/api/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              path: pathInput.value,
+              recursive: recursiveInput.checked,
+              modelOnly: modelOnlyInput.checked,
+              format: formatInput.value,
+            }),
+          });
+
+          const data = await response.json();
+          renderLog(data.progress || []);
+
+          if (!data.success) {
+            status.textContent = data.error || 'Run failed.';
+            viewer.innerHTML = `<div class="empty">${data.error || 'Run failed.'}</div>`;
+            return;
+          }
+
+          status.textContent = 'Run complete.';
+          renderViewer(data.diagramUrl);
+
+          if (data.diagramUrl) {
+            svgLink.href = data.diagramUrl;
+            svgLink.hidden = false;
+          }
+          if (data.modelUrl) {
+            pumlLink.href = data.modelUrl;
+            pumlLink.hidden = false;
+          }
+        } catch (error) {
+          status.textContent = 'Run failed unexpectedly.';
+          viewer.innerHTML = `<div class="empty">${error}</div>`;
+        } finally {
+          runButton.disabled = false;
+        }
+      });
+
+      renderLog([]);
+    </script>
+  </body>
+</html>

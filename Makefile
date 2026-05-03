@@ -1,4 +1,4 @@
-.PHONY: setup test demo clean lint typecheck docs
+.PHONY: setup test demo ui clean lint typecheck docs
 
 setup:
 	python3 -m venv .venv
@@ -18,6 +18,9 @@ docs:
 
 demo:
 	. .venv/bin/activate && python umlement.py demo --recursive --format svg --progress
+
+ui:
+	. .venv/bin/activate && python ui_app.py
 
 clean:
 	rm -rf .pytest_cache .mypy_cache models docs/*.html docs/*/*.html
