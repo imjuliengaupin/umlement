@@ -1,57 +1,65 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from __future__ import annotations
+
+import argparse
 from pathlib import Path
 import shutil
 import sys
-from colorama import (init, deinit, Fore, Style)
-from constants import PLANTUML_MODEL_DIR
+
+from colorama import Fore, Style, deinit, init
+
+from constants import OUTPUT_DIR, SUPPORTED_OUTPUT_FORMATS
 from uml_generator import UMLGenerator
 
 
-class UMLement():
-
+class UMLement:
     def __init__(self) -> None:
         self.generator: UMLGenerator = UMLGenerator()
 
-    def generate_class_inheritance_model(self):
-        self.generator.generate_class_inheritance_model()
+    def generate_class_inheritance_model(self) -> Path:
+        return self.generator.generate_class_inheritance_model()
 
-    def generate_class_inheritance_diagram(self):
-        self.generator.generate_class_inheritance_diagram()
+    def generate_class_inheritance_diagram(self, output_format: str = "png") -> Path:
+        return self.generator.generate_class_inheritance_diagram(output_format=output_format)
 
     def _append_python_path(self, path: Path) -> None:
         if path.is_file() and path.suffix.lower() == ".py":
-            self.generator.py_files.append(str(path))
+            resolved = str(path.resolve())
+            if resolved not in self.generator.py_files:
+                self.generator.py_files.append(resolved)
             return
 
         print(rf"{Fore.LIGHTBLACK_EX}{path} ignored, non-python files are unsupported{Style.RESET_ALL}")
 
-    def validate_argvs_provided(self, argvs_provided: list[str]) -> bool:
+    def validate_argvs_provided(self, argvs_provided: list[str], recursive: bool = False) -> bool:
         min_argvs_required: int = 1
 
-        # check if any script argvs have been provided
         if len(argvs_provided) < min_argvs_required:
-            print(f"{Fore.RED}an insufficient # of script arguments were provided (provided: {len(argvs_provided)}, expected: {min_argvs_required}){Style.RESET_ALL}")
+            print(
+                f"{Fore.RED}an insufficient # of script arguments were provided "
+                f"(provided: {len(argvs_provided)}, expected: {min_argvs_required}){Style.RESET_ALL}"
+            )
             return False
 
         self.generator.py_files = []
 
         for argv in argvs_provided:
-            path = Path(argv)
+            path = Path(argv).expanduser()
 
             if not path.exists():
                 print(f"{Fore.RED}{path} not found{Style.RESET_ALL}")
                 continue
 
             if path.is_dir():
-                for file_path in sorted(path.iterdir()):
+                iterator = sorted(path.rglob("*.py") if recursive else path.iterdir())
+                for file_path in iterator:
                     self._append_python_path(file_path)
                 continue
 
             self._append_python_path(path)
 
-        # check if atleast 1 index in the self.generator.py_files list contains a `.py` file
         if len(self.generator.py_files) < 1:
             print(f"{Fore.RED}no .py files found{Style.RESET_ALL}")
             return False
@@ -59,35 +67,68 @@ class UMLement():
         return True
 
 
-if __name__ == "__main__":
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Generate PlantUML class diagrams from Python source files.",
+    )
+    parser.add_argument("paths", nargs="+", help="Python files or folders to scan")
+    parser.add_argument(
+        "-r",
+        "--recursive",
+        action="store_true",
+        help="Recursively scan folders for Python files",
+    )
+    parser.add_argument(
+        "-f",
+        "--format",
+        default="png",
+        choices=SUPPORTED_OUTPUT_FORMATS,
+        help="Diagram output format",
+    )
+    parser.add_argument(
+        "--model-only",
+        action="store_true",
+        help="Generate the PlantUML model without rendering an image",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="UMLement 0.2.0",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    init()
+
     try:
-        init()
+        script = UMLement()
+        argvs_validated = script.validate_argvs_provided(args.paths, recursive=args.recursive)
 
-        # splice out the script name from the `sys.argv` list
-        argvs: list[str] = sys.argv[1:]
+        if not argvs_validated:
+            raise ValueError("input validation failed")
 
-        script: UMLement = UMLement()
+        model_path = script.generate_class_inheritance_model()
+        print(f"{Fore.CYAN}PlantUML model created: {model_path}{Style.RESET_ALL}")
 
-        # validate each script argv provided
-        argvs_validated: bool = script.validate_argvs_provided(argvs)
+        if args.model_only:
+            print(f"{Fore.GREEN}model generation complete, diagram rendering skipped{Style.RESET_ALL}")
+            return 0
 
-        if argvs_validated:
-            # generate a plantuml class inheritance model built from the `.py` files passed as script argvs
-            script.generate_class_inheritance_model()
+        diagram_path = script.generate_class_inheritance_diagram(output_format=args.format)
+        print(f"{Fore.GREEN}diagram created successfully: {diagram_path}{Style.RESET_ALL}")
+        return 0
 
-            # generate a class inheritance diagram built from the plantuml model generated
-            script.generate_class_inheritance_diagram()
-
-            print(f"{Fore.GREEN}class inheritance model & diagram created successfully{Style.RESET_ALL}")
-
-        else:
-            raise Exception()
-
+    except Exception as exc:
+        print(f"{Fore.RED}class inheritance model & diagram creation failed: {exc}{Style.RESET_ALL}")
+        output_dir = Path(OUTPUT_DIR)
+        if output_dir.exists():
+            shutil.rmtree(output_dir)
+        return 1
+    finally:
         deinit()
 
-    except Exception as e:
-        print(f"{Fore.RED}class inheritance model & diagram creation failed: {e}{Style.RESET_ALL}")
 
-        # remove the directory containing any partically created `.puml` model and/or `.png` diagram files
-        if Path(PLANTUML_MODEL_DIR).exists():
-            shutil.rmtree(f"{PLANTUML_MODEL_DIR}")
+if __name__ == "__main__":
+    sys.exit(main())

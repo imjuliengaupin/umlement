@@ -7,12 +7,18 @@
 
 <h3 align="center">UMLement</h3>
 
+<p align="center">
+  Reverse-engineer Python projects into clean UML class diagrams for architecture docs, reverse engineering, and portfolio demos.
+</p>
+
 [![CI/CD](https://github.com/imjuliengaupin/umlement/actions/workflows/devops.yml/badge.svg?branch=PROD)](https://github.com/imjuliengaupin/umlement/actions/workflows/devops.yml)
 [![Coverage](https://coveralls.io/repos/github/imjuliengaupin/umlement/badge.svg?branch=PROD)](https://coveralls.io/github/imjuliengaupin/umlement?branch=PROD)
 
 <a href="#demo">View Demo</a>
 ·
-<a href="#ci-cd">View Docs</a>
+<a href="#local-demo">Run Locally</a>
+·
+<a href="#features">Features</a>
 ·
 <a href="https://github.com/imjuliengaupin/umlement/issues">Report Bug</a>
 ·
@@ -20,100 +26,163 @@
 
 </div>
 
-## :rocket: <a name="setup">Getting Started</a>
+## What it does
 
-### <ins>Prerequisites</ins>
+UMLement is a lightweight Python CLI that scans Python source files and generates:
+- a PlantUML model (`.puml`)
+- a rendered diagram (`.png` or `.svg`)
+
+It is useful for:
+- visualizing class inheritance in older codebases
+- creating lightweight architecture artifacts for docs
+- reverse engineering object-oriented project structure
+- demonstrating code-analysis and developer-tooling work in a portfolio
+
+## :rocket: Getting Started
+
+### Prerequisites
+
+- Python 3.10+
+- Java
+- Graphviz
+
+### Setup
 
 1. Clone the repo
 
    ```sh
    git clone https://github.com/imjuliengaupin/umlement.git
+   cd umlement
    ```
 
-2. Install pip packages
+2. Create a virtual environment and install dependencies
 
    ```sh
-   pip3 install -r requirements.txt
+   python3 -m venv .venv
+   . .venv/bin/activate
+   pip install -r requirements.txt -r requirements-dev.txt
    ```
 
-3. Install [Graphviz](https://graphviz.org/download/). Below is a sample installation via [Homebrew](https://formulae.brew.sh/formula/graphviz) on `macOS`
+3. Ensure the PlantUML jar exists in `resources/`
+
+   The repo currently expects a PlantUML jar at:
 
    ```sh
-   brew install graphviz
+   resources/plantuml-*.jar
    ```
 
-4. Download the latest PlantUML `JAR` from [here](https://plantuml.com/download) and move it into a new folder named `resources` located in the cloned repo's root directory
+## Local demo
 
-   ```sh
-   mkdir /path/to/umlement/resources
-   mv /path/to/jar/download/*.jar /path/to/umlement/resources
-   ```
+Fastest demo path:
 
-### <ins>Usage</ins>
+```sh
+make demo
+```
 
-- individual python files
+Manual run:
 
-  ```sh
-  python3 umlement.py file1.py file2.py ... fileN.py
-  ```
+```sh
+. .venv/bin/activate
+python umlement.py demo --recursive --format svg
+```
 
-- folders
+That generates:
+- `models/umlement.puml`
+- `models/umlement.svg`
 
-  ```sh
-  python3 umlement.py /path/to/folder
-  ```
+## Usage
 
-<p align="right">
-    (<a href="#readme-top">back to top</a>)
-</p>
+### Scan one or more files
 
-## :gear: <a name="features">Features</a>
+```sh
+python umlement.py file1.py file2.py
+```
 
-- [x] Programatially generate class inheritance models using `PlantUML`
-- [x] Class inheritance diagram generation using `Graphviz`
-- [x] `python3` syntax pattern matching using `regex`
-- [x] Dynamic python script `argvs`, options include
-  - [x] individual `.py` files
-  - [x] folders
+### Scan a folder
 
-<br />
+```sh
+python umlement.py demo
+```
 
-_See the [open issues](https://github.com/imjuliengaupin/umlement/issues) for a full list of proposed features (and known issues)._
+### Scan recursively
 
-<p align="right">
-    (<a href="#readme-top">back to top</a>)
-</p>
+```sh
+python umlement.py demo --recursive
+```
 
-## :repeat: <a name="ci-cd">CI/CD</a>
+### Generate SVG instead of PNG
 
-- [x] Automated code builds using a custom [GitHub Workflow](https://docs.github.com/en/actions/using-workflows) pipeline
-  - [x] code linting using `pylint`
-  - [x] static type checking using `mypy`
-  - [x] unit testing using `pytest`
-  - [x] code coverage reports using `pytest-cov` with [Coveralls](https://coveralls.io/) integration
-  - [x] code documentation using `pdoc3`
+```sh
+python umlement.py demo --recursive --format svg
+```
 
-<br />
+### Generate only the PlantUML model
 
-_See the document [artifacts](https://github.com/imjuliengaupin/umlement/actions) generated for this project from the latest GitHub workflow action summary._
+```sh
+python umlement.py demo --recursive --model-only
+```
 
-<p align="right">
-    (<a href="#readme-top">back to top</a>)
-</p>
+## :gear: Features
 
-## :computer: <a name="demo">Demo</a>
+- class inheritance diagram generation using PlantUML
+- rendered output as PNG or SVG
+- recursive folder scanning
+- CLI help/version support
+- local demo assets for quick showcase runs
+- lightweight CI for linting, type checking, tests, coverage, and docs
+
+## Why it is interesting
+
+UMLement sits in a nice niche between documentation tooling and code analysis. It is intentionally lightweight, but still useful as a practical reverse-engineering aid for Python projects.
+
+That makes it a solid reference project for:
+- static analysis ideas
+- developer tooling
+- architecture visualization
+- CLI UX and automation
+
+## Project structure
+
+```text
+.
+├── demo/                 # sample Python classes for quick demo runs
+├── models/               # generated PlantUML and diagram artifacts
+├── resources/            # PlantUML jar location
+├── tests/                # CLI and generator regression tests
+├── uml_generator.py      # model + diagram generation
+├── uml_regex.py          # regex-based parsing rules
+└── umlement.py           # CLI entrypoint
+```
+
+## Development
+
+Useful commands:
+
+```sh
+make setup
+make test
+make demo
+make docs
+```
+
+## Current limitations
+
+This project is still intentionally lightweight.
+
+Current tradeoffs:
+- parsing is regex-based rather than AST-based
+- strongest support is for straightforward class/inheritance patterns
+- this is best positioned as a practical lightweight reverse-engineering tool, not a full semantic Python analyzer
+
+## Demo
 
 ![](./demo/images/demo.gif)
 
 ![](./demo/images/demo.png)
 
-<p align="right">
-    (<a href="#readme-top">back to top</a>)
-</p>
+## Contributing
 
-## :handshake: <a name="contribute">Contributing</a>
-
-If you find interest in this project and want to share your own insights, enhancements, or bugfixes, please feel free to contribute!
+If you find this project interesting and want to share your own enhancements or bugfixes, contributions are welcome.
 
 1. Fork the project
 2. Create your feature branch `git checkout -b feature/branchname`
@@ -121,14 +190,6 @@ If you find interest in this project and want to share your own insights, enhanc
 4. Push your feature branch `git push origin feature/branchname`
 5. Open a pull request
 
-<p align="right">
-    (<a href="#readme-top">back to top</a>)
-</p>
+## License
 
-## :pencil: <a name="license">License</a>
-
-Distributed under the MIT License. See `LICENSE.md` for more information.
-
-<p align="right">
-    (<a href="#readme-top">back to top</a>)
-</p>
+Distributed under the MIT License. See `LICENSE` for more information.

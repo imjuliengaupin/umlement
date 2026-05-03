@@ -1,6 +1,13 @@
 # macOS
 .DS_Store
 
+# Generated UMLement artifacts
+models/*.png
+models/*.svg
+models/*.puml
+coverage/code-coverage-report.zip
+docs/code-documentation.zip
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
