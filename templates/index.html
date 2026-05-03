@@ -40,6 +40,20 @@
         max-width: 760px;
         line-height: 1.6;
       }
+      .hero-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        margin-bottom: 12px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: rgba(96, 165, 250, 0.08);
+        color: #bfdbfe;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
       .grid {
         display: grid;
         gap: 20px;
@@ -112,7 +126,14 @@
         font-size: 13px;
         line-height: 1.5;
       }
-      .log-line { margin-bottom: 10px; }
+      .log-line {
+        margin-bottom: 10px;
+        padding-left: 12px;
+        border-left: 2px solid rgba(96, 165, 250, 0.18);
+      }
+      .log-label {
+        color: #dbeafe;
+      }
       .log-detail { color: var(--muted); margin-top: 2px; }
       .toolbar {
         display: flex;
@@ -153,6 +174,16 @@
         font-size: 14px;
         margin-top: 10px;
       }
+      .callout {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border: 1px solid rgba(52, 211, 153, 0.2);
+        border-radius: 14px;
+        background: rgba(52, 211, 153, 0.08);
+        color: #d1fae5;
+        font-size: 13px;
+        line-height: 1.5;
+      }
       @media (max-width: 980px) {
         .grid { grid-template-columns: 1fr; }
         .viewer, .viewer iframe, .empty { min-height: 540px; height: 540px; }
@@ -162,6 +193,7 @@
   <body>
     <div class="wrap">
       <div class="hero">
+        <div class="hero-kicker">Local interactive demo</div>
         <h1>UMLement Viewer</h1>
         <p>
           A tiny local UI for running UMLement, watching progress, and previewing the generated diagram.
@@ -196,6 +228,7 @@
 
           <button id="runButton">Generate diagram</button>
           <div id="status" class="status">Ready for a local demo run.</div>
+          <div class="callout">Tip: leave <strong>SVG</strong> selected for the cleanest live preview and zoom behavior.</div>
 
           <div id="log" class="log"></div>
         </section>
@@ -236,7 +269,10 @@
         for (const line of lines) {
           const row = document.createElement('div');
           row.className = 'log-line';
-          row.textContent = line.label;
+          const label = document.createElement('div');
+          label.className = 'log-label';
+          label.textContent = line.label;
+          row.appendChild(label);
           if (line.detail) {
             const detail = document.createElement('div');
             detail.className = 'log-detail';
