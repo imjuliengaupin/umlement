@@ -74,7 +74,7 @@
         color: var(--muted);
         margin-bottom: 8px;
       }
-      input, select {
+      input, select, textarea {
         width: 100%;
         border: 1px solid var(--border);
         border-radius: 12px;
@@ -82,6 +82,10 @@
         color: var(--text);
         padding: 12px 14px;
         margin-bottom: 14px;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 96px;
       }
       .row {
         display: flex;
@@ -206,6 +210,16 @@
           <label for="path">Path to scan</label>
           <input id="path" type="text" value="{{ default_path }}">
 
+          <label for="sampleProject">Sample project</label>
+          <select id="sampleProject">
+            {% for project in sample_projects %}
+            <option value="{{ project.path }}" {% if project.path == default_path %}selected{% endif %}>{{ project.label }}</option>
+            {% endfor %}
+          </select>
+
+          <label for="extraPaths">Extra Python files or folders (one per line)</label>
+          <textarea id="extraPaths" rows="4" placeholder="Optional additional files or folders to include, one per line"></textarea>
+
           <div class="row">
             <div>
               <label for="format">Output format</label>
@@ -228,7 +242,7 @@
 
           <button id="runButton">Generate diagram</button>
           <div id="status" class="status">Ready for a local demo run.</div>
-          <div class="callout">Tip: leave <strong>SVG</strong> selected for the cleanest live preview and zoom behavior.</div>
+          <div class="callout">Tip: leave <strong>SVG</strong> selected for the cleanest live preview and zoom behavior. For the strongest reverse-engineering results, prefer scanning a project folder rather than only one leaf file.</div>
 
           <div id="log" class="log"></div>
         </section>
@@ -254,11 +268,17 @@
       const recursiveInput = document.getElementById('recursive');
       const modelOnlyInput = document.getElementById('modelOnly');
       const formatInput = document.getElementById('format');
+      const sampleProjectInput = document.getElementById('sampleProject');
+      const extraPathsInput = document.getElementById('extraPaths');
       const log = document.getElementById('log');
       const status = document.getElementById('status');
       const viewer = document.getElementById('viewer');
       const svgLink = document.getElementById('svgLink');
       const pumlLink = document.getElementById('pumlLink');
+
+      sampleProjectInput.addEventListener('change', () => {
+        pathInput.value = sampleProjectInput.value;
+      });
 
       function renderLog(lines) {
         log.innerHTML = '';
@@ -306,6 +326,10 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               path: pathInput.value,
+              extraPaths: extraPathsInput.value
+                .split('\n')
+                .map((value) => value.trim())
+                .filter(Boolean),
               recursive: recursiveInput.checked,
               modelOnly: modelOnlyInput.checked,
               format: formatInput.value,
@@ -321,7 +345,8 @@
             return;
           }
 
-          status.textContent = 'Run complete.';
+          const resolvedPathCount = Array.isArray(data.resolvedPaths) ? data.resolvedPaths.length : 1;
+          status.textContent = `Run complete across ${resolvedPathCount} input ${resolvedPathCount === 1 ? 'path' : 'paths'}.`;
           renderViewer(data.diagramUrl);
 
           if (data.diagramUrl) {

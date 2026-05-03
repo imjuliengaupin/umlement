@@ -36,6 +36,7 @@ It is useful for:
 - visualizing class inheritance in older codebases
 - creating lightweight architecture artifacts for docs
 - reverse engineering object-oriented project structure
+- scanning an entire Python project or a hand-picked list of files/folders
 - demonstrating code-analysis and developer-tooling work in a portfolio
 
 ## :rocket: Getting Started
@@ -86,6 +87,8 @@ make ui
 ```
 Then open <http://127.0.0.1:5000>.
 
+The UI now includes three bundled sample projects so the tool can be demonstrated against different project shapes, not just one folder.
+
 Manual run with visible progress output:
 
 ```sh
@@ -104,6 +107,14 @@ That generates:
 ```sh
 python umlement.py file1.py file2.py
 ```
+
+### Scan a mix of folders and files
+
+```sh
+python umlement.py demo_space_cafe demo_mech_pet/workshop.py
+```
+
+For broader reverse-engineering coverage, scanning a project folder is usually better than targeting only one leaf file.
 
 ### Scan a folder
 
@@ -137,11 +148,13 @@ python umlement.py demo --recursive --format svg --progress
 
 ## :gear: Features
 
-- class inheritance diagram generation using PlantUML
+- AST-backed class discovery for more robust Python project scanning
+- inheritance and object-instantiation relationship extraction
 - rendered output as PNG or SVG
 - recursive folder scanning
+- mixed input support across folders and explicit Python files
 - step-by-step terminal progress output for demos
-- tiny local web UI with run controls, progress log, and SVG preview
+- tiny local web UI with run controls, bundled sample projects, progress log, and SVG preview
 - CLI help/version support
 - local demo assets for quick showcase runs
 - lightweight CI for linting, type checking, tests, coverage, and docs
@@ -186,9 +199,9 @@ make docs
 This project is still intentionally lightweight.
 
 Current tradeoffs:
-- parsing is regex-based rather than AST-based
-- strongest support is for straightforward class/inheritance patterns
-- this is best positioned as a practical lightweight reverse-engineering tool, not a full semantic Python analyzer
+- analysis is stronger now that class discovery is AST-backed, but it is still intentionally lightweight rather than a full semantic analyzer
+- relationship extraction is best on straightforward object-oriented Python patterns
+- this is best positioned as a practical reverse-engineering tool, not a full type-aware architecture engine
 
 ## Demo
 
