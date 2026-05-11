@@ -31,14 +31,14 @@
       .wrap {
         max-width: 1380px;
         margin: 0 auto;
-        padding: 24px 18px 32px;
+        padding: 20px 18px 24px;
       }
       .header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         gap: 12px;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
       }
       .header h1 {
         margin: 0;
@@ -51,37 +51,101 @@
         font-size: 13px;
       }
       .status-inline {
-        color: var(--muted);
-        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.92);
+        color: var(--soft);
+        font-size: 12px;
         white-space: nowrap;
       }
+      .status-inline::before {
+        content: "•";
+        color: currentColor;
+      }
+      .status-inline[data-tone="Done"]::before {
+        content: "✓";
+      }
+      .status-inline[data-tone="Working"] { color: #bfdbfe; }
+      .status-inline[data-tone="Done"] { color: var(--success); }
+      .status-inline[data-tone="Error"] { color: var(--danger); }
+      .status-inline[data-tone="Sample"],
+      .status-inline[data-tone="Picked"] { color: #fcd34d; }
       .layout {
         display: grid;
-        grid-template-columns: 320px minmax(0, 1fr);
-        gap: 18px;
+        grid-template-columns: 300px minmax(0, 1fr);
+        gap: 16px;
       }
       .panel {
         background: var(--panel);
         border: 1px solid var(--border);
         border-radius: 18px;
-        padding: 16px;
+        padding: 14px;
         box-shadow: var(--shadow);
       }
+      .controls.panel {
+        padding: 12px;
+      }
       .controls {
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .controls-top {
         display: grid;
-        gap: 14px;
+        gap: 8px;
+        align-content: start;
+      }
+      .controls-actions {
+        margin-top: auto;
+        display: grid;
+        gap: 8px;
+        padding-top: 10px;
       }
       .group {
         display: grid;
-        gap: 10px;
+        gap: 3px;
+      }
+      .controls .group + .group {
+        padding-top: 0;
       }
       .group-title {
-        margin: 0;
-        color: var(--soft);
+        margin: 0 0 2px;
+        color: #9fb0c8;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+        margin-bottom: 4px;
+      }
+      .subtle-link {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        color: #93c5fd;
         font-size: 12px;
         font-weight: 600;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
+        text-decoration: none;
+        padding: 2px 0;
+      }
+      .subtle-link:hover {
+        color: #dbeafe;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .path-helper {
+        margin-top: 3px;
       }
       label {
         display: block;
@@ -92,11 +156,16 @@
       input,
       textarea {
         width: 100%;
-        border: 1px solid var(--border);
+        border: 1px solid rgba(148, 163, 184, 0.12);
         border-radius: 12px;
-        background: rgba(8, 15, 28, 0.96);
+        background: rgba(6, 12, 22, 0.96);
         color: var(--text);
         padding: 11px 12px;
+      }
+      #path {
+        overflow-x: auto;
+        white-space: nowrap;
+        text-overflow: clip;
       }
       input:focus,
       select:focus,
@@ -113,6 +182,44 @@
         display: flex;
         gap: 8px;
       }
+      .picker-row,
+      .button-row,
+      .option-row {
+        flex-direction: column;
+      }
+      .picker-row {
+        gap: 4px;
+        margin-top: 8px;
+      }
+      .button-row {
+        gap: 4px;
+      }
+      .picker-row > .picker-trigger,
+      .button-row > button {
+        margin: 0;
+      }
+      .group.options-group {
+        margin-top: 12px;
+      }
+      .help-popover {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        width: 240px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.98);
+        color: var(--soft);
+        font-size: 11px;
+        line-height: 1.5;
+        box-shadow: var(--shadow);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-4px);
+        transition: opacity 120ms ease, transform 120ms ease;
+        z-index: 10;
+      }
       .picker-row > *,
       .option-row > *,
       .button-row > * {
@@ -120,19 +227,48 @@
       }
       .picker-trigger,
       button {
-        border: 0;
-        border-radius: 12px;
-        padding: 11px 12px;
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        border-radius: 10px;
+        padding: 9px 12px;
+        min-height: 40px;
         font-weight: 600;
-        background: linear-gradient(135deg, var(--accent), var(--accent-2));
-        color: white;
+        background: rgba(15, 23, 42, 0.82);
+        color: #e5eefc;
         cursor: pointer;
+        box-shadow: 0 0 0 rgba(59, 130, 246, 0);
+        transform: translateY(0);
+        transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+      }
+      .picker-trigger:hover,
+      button:hover {
+        background: rgba(30, 41, 59, 0.98);
+        border-color: rgba(124, 156, 255, 0.28);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+      }
+      .picker-trigger:active,
+      button:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
       }
       button.secondary,
       .picker-trigger.secondary {
-        background: rgba(15, 23, 42, 0.96);
-        border: 1px solid var(--border);
+        background: rgba(10, 18, 32, 0.82);
+        border: 1px solid rgba(148, 163, 184, 0.12);
         color: var(--soft);
+      }
+      button.primary {
+        background: #2563eb;
+        border-color: rgba(37, 99, 235, 0.65);
+        color: white;
+      }
+      button.primary:hover {
+        background: #1d4ed8;
+      }
+      button:disabled,
+      .picker-trigger[aria-disabled="true"] {
+        opacity: 0.45;
+        cursor: not-allowed;
       }
       .picker-trigger {
         display: inline-flex;
@@ -146,25 +282,35 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 10px 12px;
+        border: 0;
+        border-radius: 0;
+        padding: 4px 2px;
         color: var(--soft);
-        background: rgba(8, 15, 28, 0.72);
+        background: transparent;
+        min-height: 28px;
       }
       .check input {
         width: auto;
         margin: 0;
+      }
+      .option-list {
+        display: grid;
+        gap: 2px;
+        margin-top: 4px;
       }
       .label-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
       }
       .label-row label {
         margin-bottom: 0;
+      }
+      .info-chip-wrap {
+        position: relative;
+        display: inline-flex;
       }
       .info-chip {
         display: inline-flex;
@@ -177,7 +323,13 @@
         background: rgba(15, 23, 42, 0.96);
         color: var(--muted);
         font-size: 11px;
-        cursor: help;
+        cursor: pointer;
+      }
+      .info-chip-wrap:hover .help-popover,
+      .info-chip-wrap:focus-within .help-popover {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
       }
       .status-box {
         border: 1px solid var(--border);
@@ -196,53 +348,95 @@
         font-weight: 600;
       }
       .log {
-        border: 1px solid var(--border);
+        border: 1px solid rgba(148, 163, 184, 0.08);
         border-radius: 14px;
-        background: #08111f;
+        background: #040914;
         padding: 12px;
-        min-height: 220px;
-        max-height: 320px;
+        min-height: 180px;
+        max-height: 220px;
         overflow: auto;
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
         font-size: 12px;
-        line-height: 1.5;
+        line-height: 1.55;
       }
       .log-line {
-        margin-bottom: 8px;
-        padding: 8px 10px;
-        border: 1px solid rgba(124, 156, 255, 0.12);
-        border-radius: 10px;
-        background: rgba(15, 23, 42, 0.46);
+        margin-bottom: 6px;
+        padding: 0;
+        border: 0;
+        background: transparent;
       }
       .log-label {
         color: #dbeafe;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .log::before {
+        content: "> run status";
+        display: block;
+        color: #6b7c93;
+        margin-bottom: 10px;
+        text-transform: lowercase;
+      }
+      .log-label.is-complete::before {
+        content: "✓";
+        color: var(--success);
+        font-weight: 700;
+      }
+      .log-label.is-advance::before {
+        content: "→";
+        color: #93c5fd;
+      }
+      .log-label.is-start::before {
+        content: "•";
+        color: #93c5fd;
       }
       .log-detail {
-        color: var(--muted);
-        margin-top: 4px;
+        color: #7f8ea3;
+        margin-top: 2px;
+        margin-left: 18px;
         word-break: break-word;
       }
       .viewer-panel {
         display: grid;
-        gap: 12px;
+        gap: 10px;
       }
       .viewer-toolbar {
         justify-content: space-between;
         align-items: center;
+        gap: 10px;
+        padding-bottom: 2px;
       }
       .viewer-meta {
         color: var(--muted);
-        font-size: 13px;
+        font-size: 12px;
+        letter-spacing: 0.02em;
       }
       .viewer-actions {
         flex-wrap: wrap;
         justify-content: flex-end;
+        align-items: center;
+        gap: 6px;
+      }
+      .zoom-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .zoom-readout {
+        min-width: 58px;
+        justify-content: center;
       }
       .viewer-actions a,
-      .viewer-actions button {
+      .viewer-actions button,
+      .viewer-actions div {
         width: auto;
         min-width: 0;
         text-decoration: none;
+      }
+      .action-link.is-disabled {
+        pointer-events: none;
+        opacity: 0.45;
       }
       .viewer {
         border: 1px solid var(--border);
@@ -266,12 +460,14 @@
         min-height: 100%;
         transform-origin: top left;
       }
-      .viewer-canvas iframe {
+      .viewer-canvas svg {
         display: block;
-        width: 1200px;
-        height: 900px;
-        border: 0;
+        width: auto;
+        height: auto;
+        max-width: none;
         background: white;
+        pointer-events: none;
+        user-select: none;
       }
       .empty {
         min-height: 860px;
@@ -294,11 +490,7 @@
         max-width: 420px;
       }
       .viewer-foot {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        color: var(--muted);
-        font-size: 12px;
+        display: none;
       }
       @media (max-width: 980px) {
         .layout {
@@ -331,124 +523,107 @@
             folders.
           </p>
         </div>
-        <div id="statusInline" class="status-inline">Idle</div>
+        <div id="statusInline" class="status-inline" data-tone="Idle">Idle</div>
       </div>
 
       <div class="layout">
         <section class="panel controls">
-          <div class="group">
-            <div class="group-title">Input</div>
-            <div>
-              <div class="label-row">
-                <label for="path">Path</label>
-                <span
-                  class="info-chip"
-                  title="Main file or folder to scan. Use the sample button for the bundled demo project."
-                  >i</span
-                >
+          <div class="controls-top">
+            <div class="group">
+              <div class="section-head"><div class="group-title">Input Path</div><a id="sampleLink" class="subtle-link" href="#">Load Demo Project</a></div>
+              <div>
+                <input
+                  id="path"
+                  type="text"
+                  value=""
+                  placeholder="Paste a file or folder path"
+                />
               </div>
-              <input
-                id="path"
-                type="text"
-                value=""
-                placeholder="/Users/you/project-or-file.py or /Users/you/project-folder"
-              />
+              <div class="picker-row">
+                <label
+                  class="picker-trigger secondary"
+                  title="Pick one or more Python files. Additional selections are included automatically in the same run."
+                >
+                  Pick File(s)
+                  <input
+                    id="filePicker"
+                    type="file"
+                    accept=".py,text/x-python"
+                    multiple
+                  />
+                </label>
+                <label
+                  class="picker-trigger secondary"
+                  title="Pick a folder to scan all Python files inside it. Use recursive scan for nested folders."
+                >
+                  Pick Folder
+                  <input
+                    id="folderPicker"
+                    type="file"
+                    webkitdirectory
+                    directory
+                    multiple
+                  />
+                </label>
+              </div>
             </div>
-            <div class="picker-row">
-              <button id="sampleButton" class="secondary" type="button">
-                Load sample project
-              </button>
-              <label
-                class="picker-trigger secondary"
-                title="Pick one or more Python files. Additional selections are included automatically in the same run."
-              >
-                Pick file
-                <input
-                  id="filePicker"
-                  type="file"
-                  accept=".py,text/x-python"
-                  multiple
-                />
-              </label>
-              <label
-                class="picker-trigger secondary"
-                title="Pick a folder to scan all Python files inside it. Use recursive scan for nested folders."
-              >
-                Pick folder
-                <input
-                  id="folderPicker"
-                  type="file"
-                  webkitdirectory
-                  directory
-                  multiple
-                />
-              </label>
+
+            <div class="group options-group">
+              <div class="section-head"><div class="group-title">Options</div></div>
+              <div class="option-row option-list">
+                <label class="check" title="Scan nested folders inside the selected directory instead of only the top level.">
+                  <input id="recursive" type="checkbox" />
+                  <span>Recursive folder scan</span>
+                </label>
+                <label class="check" title="Generate the PlantUML model only and skip creating the rendered SVG preview artifact.">
+                  <input id="modelOnly" type="checkbox" />
+                  <span>Model only (skip image render)</span>
+                </label>
+              </div>
             </div>
           </div>
 
-          <div class="group">
-            <div class="group-title">Options</div>
-            <div class="option-row">
-              <label class="check">
-                <input id="recursive" type="checkbox" checked />
-                <span>Recursive folder scan</span>
-              </label>
-              <label class="check">
-                <input id="modelOnly" type="checkbox" />
-                <span>Model only (skip image render)</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="group">
+          <div class="controls-actions">
             <div class="button-row">
-              <button id="runButton">Generate</button>
+              <button id="runButton" class="primary">Generate</button>
               <button id="resetButton" class="secondary" type="button">
                 Reset
               </button>
             </div>
-            <div class="status-box">
-              <div class="status-line">
-                <span id="status">Ready for a local run.</span>
-                <span id="statusTone" class="status-tone">Idle</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="group">
-            <div class="group-title">Log</div>
-            <div id="log" class="log"></div>
           </div>
         </section>
 
         <section class="panel viewer-panel">
           <div class="viewer-toolbar">
-            <div class="viewer-meta">
-              Diagram preview (drag to pan, use +/- to zoom)
-            </div>
+            
             <div class="viewer-actions">
-              <button id="zoomOutButton" class="secondary" type="button">
-                −
-              </button>
-              <button id="zoomResetButton" class="secondary" type="button">
-                100%
-              </button>
-              <button id="zoomInButton" class="secondary" type="button">
-                +
-              </button>
+              <div class="zoom-group">
+                <button id="zoomOutButton" class="secondary" type="button">
+                  −
+                </button>
+                <button id="zoomResetButton" class="secondary" type="button">
+                  Fit
+                </button>
+                <button id="zoomInButton" class="secondary" type="button">
+                  +
+                </button>
+              </div>
+              <div id="zoomValue" class="picker-trigger secondary zoom-readout" aria-live="polite">100%</div>
               <a
                 id="svgLink"
-                class="picker-trigger secondary"
-                href="#"
+                class="picker-trigger secondary action-link is-disabled"
+                href="javascript:void(0)"
                 target="_blank"
+                aria-disabled="true"
                 hidden
                 >Open artifact</a
               >
               <a
                 id="pumlLink"
-                class="picker-trigger secondary"
-                href="#"
+                class="picker-trigger secondary action-link is-disabled"
+                href="javascript:void(0)"
                 target="_blank"
+                aria-disabled="true"
                 hidden
                 >Open model</a
               >
@@ -471,20 +646,23 @@
             <span id="viewerCaptionLeft">Waiting for a generated diagram.</span>
             <span id="viewerCaptionRight">Drag to pan when loaded.</span>
           </div>
+
+          <div class="group">
+            <div id="log" class="log"></div>
+          </div>
         </section>
       </div>
     </div>
 
     <script>
+      const SAMPLE_PATH = {{ default_path|tojson }};
       const runButton = document.getElementById("runButton");
       const resetButton = document.getElementById("resetButton");
-      const sampleButton = document.getElementById("sampleButton");
+      const sampleLink = document.getElementById("sampleLink");
       const pathInput = document.getElementById("path");
       const recursiveInput = document.getElementById("recursive");
       const modelOnlyInput = document.getElementById("modelOnly");
       const log = document.getElementById("log");
-      const status = document.getElementById("status");
-      const statusTone = document.getElementById("statusTone");
       const statusInline = document.getElementById("statusInline");
       const viewer = document.getElementById("viewer");
       const svgLink = document.getElementById("svgLink");
@@ -496,12 +674,29 @@
       const zoomInButton = document.getElementById("zoomInButton");
       const zoomOutButton = document.getElementById("zoomOutButton");
       const zoomResetButton = document.getElementById("zoomResetButton");
+      const zoomValue = document.getElementById("zoomValue");
       let viewerScale = 1;
+      let minViewerScale = 0.25;
+      let fittedViewerScale = 1;
 
       function setStatus(message, tone) {
-        status.textContent = message;
-        statusTone.textContent = tone;
         statusInline.textContent = tone;
+        statusInline.dataset.tone = tone;
+        statusInline.title = message;
+      }
+
+      function setActionLink(link, href) {
+        if (!href) {
+          link.href = "javascript:void(0)";
+          link.hidden = true;
+          link.classList.add("is-disabled");
+          link.setAttribute("aria-disabled", "true");
+          return;
+        }
+        link.href = href;
+        link.hidden = false;
+        link.classList.remove("is-disabled");
+        link.setAttribute("aria-disabled", "false");
       }
 
       function renderLog(lines) {
@@ -514,8 +709,13 @@
           const row = document.createElement("div");
           row.className = "log-line";
           const label = document.createElement("div");
-          label.className = "log-label";
-          label.textContent = line.label;
+          const text = line.label || "";
+          let toneClass = "";
+          if (text.startsWith("[complete]")) toneClass = "is-complete";
+          else if (text.startsWith("[advance]")) toneClass = "is-advance";
+          else if (text.startsWith("[start]")) toneClass = "is-start";
+          label.className = `log-label ${toneClass}`.trim();
+          label.textContent = text.replace(/^\[(start|advance|complete)\]\s*/, "");
           row.appendChild(label);
           if (line.detail) {
             const detail = document.createElement("div");
@@ -530,39 +730,36 @@
 
       function attachViewerInteractions() {
         const stage = viewer.querySelector(".viewer-stage");
-        if (!stage) {
-          return;
-        }
+        if (!stage) return;
 
+        const canvas = viewer.querySelector(".viewer-canvas");
         let dragging = false;
         let startX = 0;
         let startY = 0;
         let scrollLeft = 0;
         let scrollTop = 0;
 
-        stage.addEventListener("mousedown", (event) => {
+        const beginDrag = (event) => {
           dragging = true;
           stage.classList.add("is-dragging");
           startX = event.pageX;
           startY = event.pageY;
           scrollLeft = stage.scrollLeft;
           scrollTop = stage.scrollTop;
-        });
+        };
 
-        stage.addEventListener("mouseleave", () => {
+        stage.addEventListener("mousedown", beginDrag);
+        if (canvas) canvas.addEventListener("mousedown", beginDrag);
+
+        const stopDragging = () => {
           dragging = false;
           stage.classList.remove("is-dragging");
-        });
+        };
 
-        stage.addEventListener("mouseup", () => {
-          dragging = false;
-          stage.classList.remove("is-dragging");
-        });
-
+        stage.addEventListener("mouseleave", stopDragging);
+        stage.addEventListener("mouseup", stopDragging);
         stage.addEventListener("mousemove", (event) => {
-          if (!dragging) {
-            return;
-          }
+          if (!dragging) return;
           event.preventDefault();
           const dx = event.pageX - startX;
           const dy = event.pageY - startY;
@@ -573,115 +770,164 @@
 
       function applyViewerScale() {
         const canvas = viewer.querySelector(".viewer-canvas");
-        if (!canvas) {
-          return;
-        }
+        if (!canvas) return;
         canvas.style.transform = `scale(${viewerScale})`;
+        zoomValue.textContent = `${Math.round(viewerScale * 100)}%`;
       }
 
-      function renderViewer(diagramUrl) {
+      function fitViewerToStage() {
+        const stage = viewer.querySelector(".viewer-stage");
+        const svg = viewer.querySelector("svg");
+        if (!stage || !svg) return;
+        const availableWidth = Math.max(320, stage.clientWidth - 24);
+        const availableHeight = Math.max(320, stage.clientHeight - 24);
+        const box = svg.viewBox.baseVal;
+        const svgWidth = box && box.width ? box.width : svg.getBoundingClientRect().width || 1200;
+        const svgHeight = box && box.height ? box.height : svg.getBoundingClientRect().height || 900;
+        const fitted = Math.min(1, Math.max(0.25, Math.min(availableWidth / svgWidth, availableHeight / svgHeight)));
+        minViewerScale = 0.2;
+        fittedViewerScale = fitted;
+        viewerScale = fitted;
+        applyViewerScale();
+        stage.scrollLeft = 0;
+        stage.scrollTop = 0;
+      }
+
+      async function renderViewer(diagramUrl) {
         if (!diagramUrl) {
-          viewer.innerHTML =
-            '<div class="empty"><div><h2>Model-only run</h2><p>No rendered image was created for this run.</p></div></div>';
+          viewer.innerHTML = '<div class="empty"><div><h2>Model-only run</h2><p>No rendered image was created for this run.</p></div></div>';
           return;
         }
-        viewer.innerHTML = `<div class="viewer-stage"><div class="viewer-canvas"><iframe src="${diagramUrl}"></iframe></div></div>`;
+
+        const response = await fetch(diagramUrl);
+        const svgMarkup = await response.text();
+        viewer.innerHTML = `<div class="viewer-stage"><div class="viewer-canvas">${svgMarkup}</div></div>`;
         viewerScale = 1;
+        fittedViewerScale = 1;
         applyViewerScale();
         attachViewerInteractions();
+        requestAnimationFrame(() => fitViewerToStage());
+      }
+
+      function resetViewer() {
+        viewer.innerHTML = '<div class="empty"><div><h2>No diagram yet</h2><p>Load a local file or folder, then generate a diagram to preview it here.</p></div></div>';
+        viewerCaptionLeft.textContent = "Waiting for a generated diagram.";
+        viewerCaptionRight.textContent = "Drag to pan when loaded.";
+        setActionLink(svgLink, null);
+        setActionLink(pumlLink, null);
       }
 
       function resetForm() {
         pathInput.value = "";
-        recursiveInput.checked = true;
+        recursiveInput.checked = false;
         modelOnlyInput.checked = false;
-        formatInput.value = "svg";
-        extraPathsInput.value = "";
+        filePicker.value = "";
+        folderPicker.value = "";
         renderLog([]);
-        viewer.innerHTML =
-          '<div class="empty"><div><h2>No diagram yet</h2><p>Load a local file or folder, then generate a diagram to preview it here.</p></div></div>';
-        viewerCaptionLeft.textContent = "Waiting for a generated diagram.";
-        viewerCaptionRight.textContent = "Drag to pan when loaded.";
-        svgLink.hidden = true;
-        pumlLink.hidden = true;
+        viewerScale = 1;
+        fittedViewerScale = 1;
+        zoomValue.textContent = "100%";
+        resetViewer();
         setStatus("Ready for a local run.", "Idle");
       }
 
       function applyPickedPath(input, kind) {
         const files = Array.from(input.files || []);
-        if (!files.length) {
-          return;
-        }
+        if (!files.length) return;
 
         const first = files[0];
-        const browserPath = first.webkitRelativePath || first.name;
 
-        if (kind === "folder" && first.webkitRelativePath) {
-          const folderName = first.webkitRelativePath.split("/")[0];
-          pathInput.value = folderName;
-          setStatus(
-            "Folder selected, replace with a real local path if needed.",
-            "Picked",
-          );
+        if (kind === "folder") {
+          const folderName = first.webkitRelativePath ? first.webkitRelativePath.split("/")[0] : first.name;
+          pathInput.value = folderName || "";
+          pathInput.scrollLeft = 0;
+          setStatus("Folder selected. Browser pickers usually expose only the folder name here, not the full local path.", "Picked");
           return;
         }
 
-        pathInput.value = browserPath;
-        setStatus(
-          "File selected, replace with a real local path if needed.",
-          "Picked",
-        );
+        if (files.length === 1) {
+          pathInput.value = first.name || "";
+          pathInput.scrollLeft = 0;
+          setStatus("File selected. Browser pickers usually expose only the file name here, not the full local path.", "Picked");
+          return;
+        }
+
+        pathInput.value = files.map((file) => file.name).join(", ");
+        pathInput.scrollLeft = 0;
+        setStatus(`${files.length} files selected. Browser pickers usually expose only file names here, not full local paths.`, "Picked");
       }
 
+      sampleLink.addEventListener("click", (event) => {
+        event.preventDefault();
+        pathInput.value = SAMPLE_PATH;
+        filePicker.value = "";
+        folderPicker.value = "";
+        setStatus("Sample project loaded.", "Sample");
+      });
+
+      pathInput.addEventListener("input", () => {
+        if (!pathInput.value.trim()) {
+          resetForm();
+        }
+      });
+
       resetButton.addEventListener("click", resetForm);
-      filePicker.addEventListener("change", () =>
-        applyPickedPath(filePicker, "file"),
-      );
-      folderPicker.addEventListener("change", () =>
-        applyPickedPath(folderPicker, "folder"),
-      );
+      filePicker.addEventListener("change", () => applyPickedPath(filePicker, "file"));
+      folderPicker.addEventListener("change", () => applyPickedPath(folderPicker, "folder"));
+
       zoomInButton.addEventListener("click", () => {
         viewerScale = Math.min(2.4, viewerScale + 0.2);
         applyViewerScale();
       });
       zoomOutButton.addEventListener("click", () => {
-        viewerScale = Math.max(0.6, viewerScale - 0.2);
-        applyViewerScale();
-      });
-      zoomResetButton.addEventListener("click", () => {
-        viewerScale = 1;
+        viewerScale = Math.max(minViewerScale, viewerScale - 0.08);
         applyViewerScale();
         const stage = viewer.querySelector(".viewer-stage");
         if (stage) {
-          stage.scrollTop = 0;
           stage.scrollLeft = 0;
+          stage.scrollTop = 0;
         }
+      });
+      zoomResetButton.addEventListener("click", () => {
+        const stage = viewer.querySelector(".viewer-stage");
+        const svg = viewer.querySelector("svg");
+        if (stage && svg) {
+          fitViewerToStage();
+          return;
+        }
+        viewerScale = fittedViewerScale || 1;
+        applyViewerScale();
       });
 
       runButton.addEventListener("click", async () => {
+        const path = pathInput.value.trim();
+        if (!path) {
+          setStatus("Provide a file or folder path first.", "Needs input");
+          renderLog([]);
+          resetViewer();
+          viewer.innerHTML = '<div class="empty"><div><h2>Path required</h2><p>Paste a local path, use Load sample project, or try a picker helper first.</p></div></div>';
+          viewerCaptionLeft.textContent = "No diagram generated.";
+          viewerCaptionRight.textContent = "Path input is required.";
+          return;
+        }
+
         runButton.disabled = true;
         setStatus("Running UMLement...", "Working");
         renderLog([]);
-        viewer.innerHTML =
-          '<div class="empty"><div><h2>Generating diagram</h2><p>Preparing preview artifact...</p></div></div>';
+        viewer.innerHTML = '<div class="empty"><div><h2>Generating diagram</h2><p>Preparing preview artifact...</p></div></div>';
         viewerCaptionLeft.textContent = "Run in progress...";
         viewerCaptionRight.textContent = "Preview will update when ready.";
-        svgLink.hidden = true;
-        pumlLink.hidden = true;
+        setActionLink(svgLink, null);
+        setActionLink(pumlLink, null);
 
         try {
           const response = await fetch("/api/run", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              path: pathInput.value,
-              extraPaths: extraPathsInput.value
-                .split("\n")
-                .map((value) => value.trim())
-                .filter(Boolean),
+              path,
               recursive: recursiveInput.checked,
               modelOnly: modelOnlyInput.checked,
-              format: formatInput.value,
             }),
           });
 
@@ -692,14 +938,13 @@
             setStatus(data.error || "Run failed.", "Error");
             viewer.innerHTML = `<div class="empty"><div><h2>Run failed</h2><p>${data.error || "Run failed."}</p></div></div>`;
             viewerCaptionLeft.textContent = "No diagram generated.";
-            viewerCaptionRight.textContent =
-              "Fix the input or environment and try again.";
+            viewerCaptionRight.textContent = "Fix the input or environment and try again.";
             return;
           }
 
           const projectLabel = data.projectLabel || "input";
           setStatus(`Run complete for ${projectLabel}.`, "Done");
-          renderViewer(data.diagramUrl);
+          await renderViewer(data.diagramUrl);
           viewerCaptionLeft.textContent = data.diagramUrl
             ? `Loaded preview for ${projectLabel}.`
             : `Generated model for ${projectLabel}.`;
@@ -707,14 +952,8 @@
             ? "Use zoom controls or drag to navigate."
             : "No rendered artifact available.";
 
-          if (data.diagramUrl) {
-            svgLink.href = data.diagramUrl;
-            svgLink.hidden = false;
-          }
-          if (data.modelUrl) {
-            pumlLink.href = data.modelUrl;
-            pumlLink.hidden = false;
-          }
+          setActionLink(svgLink, data.diagramUrl || null);
+          setActionLink(pumlLink, data.modelUrl || null);
         } catch (error) {
           setStatus("Run failed unexpectedly.", "Error");
           viewer.innerHTML = `<div class="empty"><div><h2>Unexpected failure</h2><p>${error}</p></div></div>`;
@@ -726,6 +965,7 @@
       });
 
       renderLog([]);
+      resetViewer();
       setStatus("Ready for a local run.", "Idle");
     </script>
   </body>

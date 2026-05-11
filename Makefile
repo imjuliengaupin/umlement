@@ -19,7 +19,7 @@ docs:
 	. .venv/bin/activate && pdoc --force --html $$(find . -maxdepth 1 -name '*.py' -print) --output-dir docs/
 
 demo:
-	. .venv/bin/activate && python umlement.py demo --recursive --format svg --progress
+	. .venv/bin/activate && python umlement.py demo/sample_project --recursive --format svg --progress
 
 ui:
 	. .venv/bin/activate && python ui_app.py
