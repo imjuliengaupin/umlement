@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import shutil
+from time import perf_counter
 from typing import Callable
 
 from constants import OUTPUT_DIR
@@ -23,22 +24,28 @@ class RunResult:
 class CallbackProgressReporter:
     def __init__(self, callback: ProgressCallback | None = None) -> None:
         self.callback = callback
+        self._started_at = perf_counter()
+        self._step = 0
 
     def start(self, label: str, detail: str | None = None) -> None:
         self._emit("start", label, detail)
 
     def advance(self, label: str, detail: str | None = None) -> None:
+        self._step += 1
         self._emit("advance", label, detail)
 
     def complete(self, label: str, detail: str | None = None) -> None:
-        self._emit("complete", label, detail)
+        elapsed = perf_counter() - self._started_at
+        suffix = f"{elapsed:.2f}s elapsed"
+        merged_detail = f"{detail} ({suffix})" if detail else suffix
+        self._emit("complete", label, merged_detail)
 
     def info(self, label: str, detail: str | None = None) -> None:
         self._emit("info", label, detail)
 
     def _emit(self, kind: str, label: str, detail: str | None = None) -> None:
         if self.callback:
-            rendered = f"[{kind}] {label}"
+            rendered = label if kind == "info" else f"[{kind}] {label}"
             self.callback(rendered, detail)
 
 

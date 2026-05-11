@@ -1,8 +1,10 @@
-.PHONY: setup test demo ui clean lint typecheck docs
+.PHONY: setup test demo ui clean lint typecheck docs verify
 
 setup:
 	python3 -m venv .venv
 	. .venv/bin/activate && pip install -r requirements.txt -r requirements-dev.txt
+
+verify: test typecheck lint
 
 test:
 	. .venv/bin/activate && pytest -q

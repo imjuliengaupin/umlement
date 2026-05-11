@@ -11,13 +11,14 @@ import sys
 from colorama import Fore, Style, deinit, init
 
 from constants import OUTPUT_DIR, SUPPORTED_OUTPUT_FORMATS
+from progress_types import ProgressSink
 from uml_generator import UMLGenerator
 from umlement_progress import ProgressReporter
 
 
 class UMLement:
-    def __init__(self, progress_enabled: bool = False, progress: ProgressReporter | None = None) -> None:
-        self.progress = progress or ProgressReporter(enabled=progress_enabled)
+    def __init__(self, progress_enabled: bool = False, progress: ProgressSink | None = None) -> None:
+        self.progress: ProgressSink = progress or ProgressReporter(enabled=progress_enabled)
         self.generator: UMLGenerator = UMLGenerator(progress=self.progress)
 
     def generate_class_inheritance_model(self) -> Path:

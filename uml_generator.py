@@ -4,14 +4,15 @@ import os
 import subprocess
 from pathlib import Path
 
-from constants import OUTPUT_DIR, PLANTUML_MODEL_NAME, RESOURCES_DIR
+from constants import OUTPUT_DIR, PLANTUML_HEADER_LINES, PLANTUML_MODEL_NAME, RESOURCES_DIR
+from progress_types import ProgressSink
 from uml_ast import parse_python_file
 from uml_model import UMLClass, UMLModel, UMLRelationship
 from umlement_progress import ProgressReporter
 
 
 class UMLGenerator:
-    def __init__(self, progress: ProgressReporter | None = None) -> None:
+    def __init__(self, progress: ProgressSink | None = None) -> None:
         self.py_files: list[str] = []
         self.progress = progress or ProgressReporter(enabled=False)
 
@@ -84,17 +85,23 @@ class UMLGenerator:
 
         with open(output_model_path, "w", encoding="utf8") as plantuml_file:
             plantuml_file.write("@startuml\n")
+            for line in PLANTUML_HEADER_LINES:
+                plantuml_file.write(f"{line}\n")
             plantuml_file.write("skinparam classAttributeIconSize 0\n")
             plantuml_file.write("hide empty members\n")
-            plantuml_file.write("left to right direction\n\n")
+            plantuml_file.write("left to right direction\n")
+            plantuml_file.write("\n")
 
             for package_name, classes in sorted(package_map.items()):
                 plantuml_file.write(f"package {package_name} {{\n")
                 for uml_class in classes:
-                    plantuml_file.write(f"class {uml_class.name}\n")
+                    stereotype = " <<entrypoint>>" if uml_class.name.lower().endswith(("app", "cli", "runner")) else ""
+                    plantuml_file.write(f"class {uml_class.name}{stereotype}\n")
                     for attribute in uml_class.attributes:
                         plantuml_file.write(f"{uml_class.name} : +{attribute}\n")
                     for method in uml_class.methods:
+                        if method.startswith("__") and method.endswith("__"):
+                            continue
                         plantuml_file.write(f"{uml_class.name} : +{method}()\n")
                 plantuml_file.write("}\n\n")
 

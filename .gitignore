@@ -5,6 +5,10 @@
 models/*.png
 models/*.svg
 models/*.puml
+resources/*.jar
+.vscode/
+.capture-venv/
+.tmp*
 coverage/code-coverage-report.zip
 docs/code-documentation.zip
 

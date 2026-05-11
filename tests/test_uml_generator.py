@@ -45,3 +45,25 @@ def test_generate_class_inheritance_model_returns_model_path(tmp_path: Path) -> 
 
     assert model_path.exists()
     assert model_path.suffix == ".puml"
+
+
+def test_generate_class_inheritance_model_applies_custom_style_and_hides_dunder_methods(tmp_path: Path) -> None:
+    source_file = tmp_path / "runner.py"
+    source_file.write_text(
+        "class DemoRunner(object):\n"
+        "    def __init__(self):\n"
+        "        self.path = 'x'\n"
+        "    def execute(self):\n"
+        "        return self.path\n",
+        encoding="utf-8",
+    )
+
+    generator = UMLGenerator()
+    generator.py_files = [str(source_file)]
+
+    model_text = generator.generate_class_inheritance_model().read_text(encoding="utf-8")
+
+    assert "HeaderBackgroundColor #E0E7FF" in model_text
+    assert "class DemoRunner <<entrypoint>>" in model_text
+    assert "DemoRunner : +execute()" in model_text
+    assert "DemoRunner : +__init__()" not in model_text
