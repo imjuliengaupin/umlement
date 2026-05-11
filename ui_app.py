@@ -3,25 +3,28 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import os
+
 from flask import Flask, jsonify, render_template, request, send_file
+
+from constants import SUPPORTED_OUTPUT_FORMATS
 
 from umlement_runner import run_umlement
 
 BASE_DIR = Path(__file__).resolve().parent
 MODELS_DIR = BASE_DIR / "models"
-DEFAULT_PATH = str(BASE_DIR / "demo")
-SAMPLE_PROJECTS = [
-    {"label": "Fantasy gear demo", "path": str(BASE_DIR / "demo")},
-    {"label": "Space cafe demo", "path": str(BASE_DIR / "demo_space_cafe")},
-    {"label": "Mech pet demo", "path": str(BASE_DIR / "demo_mech_pet")},
-]
+DEFAULT_PATH = ""
 
 app = Flask(__name__)
 
 
 @app.get("/")
 def index() -> str:
-    return render_template("index.html", default_path=DEFAULT_PATH, sample_projects=SAMPLE_PROJECTS)
+    return render_template(
+        "index.html",
+        default_path=DEFAULT_PATH,
+        supported_output_formats=SUPPORTED_OUTPUT_FORMATS,
+    )
 
 
 @app.post("/api/run")
@@ -30,8 +33,11 @@ def run() -> Any:
     raw_path = str(payload.get("path") or DEFAULT_PATH)
     extra_paths = [str(item) for item in payload.get("extraPaths", []) if str(item).strip()]
     recursive = bool(payload.get("recursive", True))
-    output_format = str(payload.get("format") or "svg")
+    output_format = str(payload.get("format") or "svg").lower()
     model_only = bool(payload.get("modelOnly", False))
+
+    if output_format not in SUPPORTED_OUTPUT_FORMATS:
+        return jsonify({"success": False, "error": f"Unsupported output format: {output_format}"}), 400
 
     progress_lines: list[dict[str, str | None]] = []
     resolved_paths = [raw_path, *extra_paths]
@@ -62,8 +68,11 @@ def run() -> Any:
             "progress": progress_lines,
             "diagramUrl": diagram_url,
             "modelUrl": model_url,
-            "sampleProjects": SAMPLE_PROJECTS,
             "resolvedPaths": resolved_paths,
+            "inputCount": len(resolved_paths),
+            "projectLabel": Path(raw_path).name or raw_path,
+            "outputFormat": output_format,
+            "modelOnly": model_only,
         }
     )
 
@@ -75,4 +84,4 @@ def artifacts(name: str):
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=False, port=int(os.environ.get("UMLEMENT_UI_PORT", "5000")))

@@ -7,256 +7,403 @@
     <style>
       :root {
         color-scheme: dark;
-        --bg: #0b1020;
-        --panel: #131a2b;
-        --panel-2: #0f1524;
-        --text: #edf2ff;
-        --muted: #94a3b8;
-        --accent: #60a5fa;
-        --accent-2: #34d399;
-        --border: rgba(148, 163, 184, 0.18);
+        --panel: rgba(12, 22, 38, 0.92);
+        --panel-2: rgba(15, 23, 42, 0.92);
+        --text: #e5eefc;
+        --muted: #8ea3c0;
+        --soft: #cbd5e1;
+        --accent: #7c9cff;
+        --accent-2: #38bdf8;
+        --success: #34d399;
+        --danger: #f87171;
+        --border: rgba(148, 163, 184, 0.16);
+        --shadow: 0 20px 60px rgba(2, 6, 23, 0.35);
       }
       * { box-sizing: border-box; }
       body {
         margin: 0;
         font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-        background: linear-gradient(180deg, #0b1020 0%, #0f172a 100%);
+        background: linear-gradient(180deg, #07111f 0%, #0f172a 100%);
         color: var(--text);
       }
       .wrap {
-        max-width: 1280px;
+        max-width: 1380px;
         margin: 0 auto;
-        padding: 32px 20px 40px;
+        padding: 24px 18px 32px;
       }
-      .hero {
-        margin-bottom: 20px;
-      }
-      .hero h1 {
-        margin: 0;
-        font-size: 32px;
-      }
-      .hero p {
-        color: var(--muted);
-        max-width: 760px;
-        line-height: 1.6;
-      }
-      .hero-kicker {
-        display: inline-flex;
+      .header {
+        display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 8px;
-        padding: 6px 10px;
-        margin-bottom: 12px;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        background: rgba(96, 165, 250, 0.08);
-        color: #bfdbfe;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
+        gap: 12px;
+        margin-bottom: 16px;
       }
-      .grid {
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: -0.02em;
+      }
+      .header p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .status-inline {
+        color: var(--muted);
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .layout {
         display: grid;
-        gap: 20px;
-        grid-template-columns: 360px minmax(0, 1fr);
+        grid-template-columns: 320px minmax(0, 1fr);
+        gap: 18px;
       }
       .panel {
-        background: rgba(19, 26, 43, 0.92);
+        background: var(--panel);
         border: 1px solid var(--border);
         border-radius: 18px;
-        padding: 18px;
-        box-shadow: 0 18px 48px rgba(2, 6, 23, 0.35);
+        padding: 16px;
+        box-shadow: var(--shadow);
+      }
+      .controls {
+        display: grid;
+        gap: 14px;
+      }
+      .group {
+        display: grid;
+        gap: 10px;
+      }
+      .group-title {
+        margin: 0;
+        color: var(--soft);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
       }
       label {
         display: block;
         font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
         color: var(--muted);
-        margin-bottom: 8px;
+        margin-bottom: 6px;
       }
       input, select, textarea {
         width: 100%;
         border: 1px solid var(--border);
         border-radius: 12px;
-        background: var(--panel-2);
+        background: rgba(8, 15, 28, 0.96);
         color: var(--text);
-        padding: 12px 14px;
-        margin-bottom: 14px;
+        padding: 11px 12px;
+      }
+      input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: rgba(124, 156, 255, 0.7);
+        box-shadow: 0 0 0 3px rgba(124, 156, 255, 0.14);
       }
       textarea {
+        min-height: 84px;
         resize: vertical;
-        min-height: 96px;
       }
-      .row {
+      .picker-row,
+      .option-row,
+      .button-row,
+      .viewer-toolbar,
+      .viewer-actions {
         display: flex;
-        gap: 10px;
+        gap: 8px;
       }
-      .row > div { flex: 1; }
-      .checkbox {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 14px;
-        color: var(--muted);
+      .picker-row > *,
+      .option-row > *,
+      .button-row > * {
+        flex: 1;
       }
-      .checkbox input {
-        width: auto;
-        margin: 0;
-      }
+      .picker-trigger,
       button {
-        width: 100%;
         border: 0;
         border-radius: 12px;
-        padding: 13px 16px;
-        font-weight: 700;
-        background: linear-gradient(135deg, var(--accent), #818cf8);
+        padding: 11px 12px;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
         color: white;
         cursor: pointer;
       }
-      button:disabled {
-        cursor: wait;
-        opacity: 0.7;
+      button.secondary,
+      .picker-trigger.secondary {
+        background: rgba(15, 23, 42, 0.96);
+        border: 1px solid var(--border);
+        color: var(--soft);
       }
-      .log {
-        margin-top: 16px;
+      .picker-trigger {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .picker-trigger input {
+        display: none;
+      }
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 12px;
+        color: var(--soft);
+        background: rgba(8, 15, 28, 0.72);
+      }
+      .check input {
+        width: auto;
+        margin: 0;
+      }
+      .helper {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .status-box {
         border: 1px solid var(--border);
         border-radius: 14px;
-        background: #0a1120;
-        padding: 14px;
-        min-height: 240px;
-        max-height: 420px;
+        padding: 12px;
+        background: rgba(8, 15, 28, 0.75);
+      }
+      .status-line {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 13px;
+      }
+      .status-tone {
+        color: var(--success);
+        font-weight: 600;
+      }
+      .log {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: #08111f;
+        padding: 12px;
+        min-height: 220px;
+        max-height: 320px;
         overflow: auto;
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 13px;
+        font-size: 12px;
         line-height: 1.5;
       }
       .log-line {
-        margin-bottom: 10px;
-        padding-left: 12px;
-        border-left: 2px solid rgba(96, 165, 250, 0.18);
+        margin-bottom: 8px;
+        padding: 8px 10px;
+        border: 1px solid rgba(124, 156, 255, 0.12);
+        border-radius: 10px;
+        background: rgba(15, 23, 42, 0.46);
       }
       .log-label {
         color: #dbeafe;
       }
-      .log-detail { color: var(--muted); margin-top: 2px; }
-      .toolbar {
-        display: flex;
+      .log-detail {
+        color: var(--muted);
+        margin-top: 4px;
+        word-break: break-word;
+      }
+      .viewer-panel {
+        display: grid;
+        gap: 12px;
+      }
+      .viewer-toolbar {
         justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
       }
-      .toolbar a {
-        color: var(--accent);
+      .viewer-meta {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .viewer-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .viewer-actions a,
+      .viewer-actions button {
+        width: auto;
+        min-width: 0;
         text-decoration: none;
-        font-size: 14px;
       }
       .viewer {
         border: 1px solid var(--border);
         border-radius: 16px;
         background: white;
-        min-height: 720px;
         overflow: hidden;
       }
-      .viewer iframe {
+      .viewer-stage {
         width: 100%;
-        height: 720px;
+        height: 860px;
+        overflow: auto;
+        cursor: grab;
+        background: white;
+      }
+      .viewer-stage.is-dragging {
+        cursor: grabbing;
+      }
+      .viewer-canvas {
+        width: fit-content;
+        min-width: 100%;
+        min-height: 100%;
+        transform-origin: top left;
+      }
+      .viewer-canvas iframe {
+        display: block;
+        width: 1200px;
+        height: 900px;
         border: 0;
         background: white;
       }
       .empty {
-        min-height: 720px;
+        min-height: 860px;
         display: grid;
         place-items: center;
+        text-align: center;
+        padding: 28px;
         color: #334155;
         background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
-        text-align: center;
-        padding: 32px;
       }
-      .status {
+      .empty h2 {
+        margin: 0 0 10px;
+        color: #0f172a;
+        font-size: 22px;
+      }
+      .empty p {
+        margin: 0;
+        color: #475569;
+        line-height: 1.6;
+        max-width: 420px;
+      }
+      .viewer-foot {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
         color: var(--muted);
-        font-size: 14px;
-        margin-top: 10px;
-      }
-      .callout {
-        margin-top: 14px;
-        padding: 12px 14px;
-        border: 1px solid rgba(52, 211, 153, 0.2);
-        border-radius: 14px;
-        background: rgba(52, 211, 153, 0.08);
-        color: #d1fae5;
-        font-size: 13px;
-        line-height: 1.5;
+        font-size: 12px;
       }
       @media (max-width: 980px) {
-        .grid { grid-template-columns: 1fr; }
-        .viewer, .viewer iframe, .empty { min-height: 540px; height: 540px; }
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .picker-row,
+        .option-row,
+        .button-row,
+        .viewer-toolbar {
+          flex-direction: column;
+        }
+        .viewer-actions {
+          justify-content: flex-start;
+        }
+        .viewer-stage,
+        .empty {
+          height: 560px;
+          min-height: 560px;
+        }
       }
     </style>
   </head>
   <body>
     <div class="wrap">
-      <div class="hero">
-        <div class="hero-kicker">Local interactive demo</div>
-        <h1>UMLement Viewer</h1>
-        <p>
-          A tiny local UI for running UMLement, watching progress, and previewing the generated diagram.
-          It stays intentionally small, but makes the project feel much more interactive in a live demo.
-        </p>
+      <div class="header">
+        <div>
+          <h1>UMLement Viewer</h1>
+          <p>Generate and inspect UML diagrams from local Python files or folders.</p>
+        </div>
+        <div id="statusInline" class="status-inline">Idle</div>
       </div>
 
-      <div class="grid">
-        <section class="panel">
-          <label for="path">Path to scan</label>
-          <input id="path" type="text" value="{{ default_path }}">
-
-          <label for="sampleProject">Sample project</label>
-          <select id="sampleProject">
-            {% for project in sample_projects %}
-            <option value="{{ project.path }}" {% if project.path == default_path %}selected{% endif %}>{{ project.label }}</option>
-            {% endfor %}
-          </select>
-
-          <label for="extraPaths">Extra Python files or folders (one per line)</label>
-          <textarea id="extraPaths" rows="4" placeholder="Optional additional files or folders to include, one per line"></textarea>
-
-          <div class="row">
+      <div class="layout">
+        <section class="panel controls">
+          <div class="group">
+            <div class="group-title">Input</div>
             <div>
-              <label for="format">Output format</label>
-              <select id="format">
-                <option value="svg" selected>SVG</option>
-                <option value="png">PNG</option>
-              </select>
+              <label for="path">Path</label>
+              <input id="path" type="text" value="{{ default_path }}" placeholder="/Users/you/project-or-file.py">
+            </div>
+            <div class="picker-row">
+              <label class="picker-trigger secondary">
+                Pick file
+                <input id="filePicker" type="file" accept=".py,text/x-python">
+              </label>
+              <label class="picker-trigger secondary">
+                Pick folder
+                <input id="folderPicker" type="file" webkitdirectory directory multiple>
+              </label>
+            </div>
+            <div class="helper">If the browser does not expose a full local path, paste it manually.</div>
+            <div>
+              <label for="extraPaths">Extra paths</label>
+              <textarea id="extraPaths" placeholder="Optional additional files or folders, one per line"></textarea>
             </div>
           </div>
 
-          <label class="checkbox">
-            <input id="recursive" type="checkbox" checked>
-            <span>Scan recursively</span>
-          </label>
+          <div class="group">
+            <div class="group-title">Options</div>
+            <div class="option-row">
+              <div>
+                <label for="format">Format</label>
+                <select id="format">
+                  {% for output_format in supported_output_formats %}
+                  <option value="{{ output_format }}" {% if output_format == 'svg' %}selected{% endif %}>{{ output_format|upper }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="option-row">
+              <label class="check">
+                <input id="recursive" type="checkbox" checked>
+                <span>Recursive</span>
+              </label>
+              <label class="check">
+                <input id="modelOnly" type="checkbox">
+                <span>Model only</span>
+              </label>
+            </div>
+          </div>
 
-          <label class="checkbox">
-            <input id="modelOnly" type="checkbox">
-            <span>Model only</span>
-          </label>
+          <div class="group">
+            <div class="button-row">
+              <button id="runButton">Generate</button>
+              <button id="resetButton" class="secondary" type="button">Reset</button>
+            </div>
+            <div class="status-box">
+              <div class="status-line">
+                <span id="status">Ready for a local run.</span>
+                <span id="statusTone" class="status-tone">Idle</span>
+              </div>
+            </div>
+          </div>
 
-          <button id="runButton">Generate diagram</button>
-          <div id="status" class="status">Ready for a local demo run.</div>
-          <div class="callout">Tip: leave <strong>SVG</strong> selected for the cleanest live preview and zoom behavior. For the strongest reverse-engineering results, prefer scanning a project folder rather than only one leaf file.</div>
-
-          <div id="log" class="log"></div>
+          <div class="group">
+            <div class="group-title">Log</div>
+            <div id="log" class="log"></div>
+          </div>
         </section>
 
-        <section class="panel">
-          <div class="toolbar">
-            <strong>Diagram preview</strong>
-            <div>
-              <a id="svgLink" href="#" target="_blank" hidden>Open artifact</a>
-              <a id="pumlLink" href="#" target="_blank" hidden>Open model</a>
+        <section class="panel viewer-panel">
+          <div class="viewer-toolbar">
+            <div class="viewer-meta">Diagram preview</div>
+            <div class="viewer-actions">
+              <button id="zoomOutButton" class="secondary" type="button">−</button>
+              <button id="zoomResetButton" class="secondary" type="button">100%</button>
+              <button id="zoomInButton" class="secondary" type="button">+</button>
+              <a id="svgLink" class="picker-trigger secondary" href="#" target="_blank" hidden>Open artifact</a>
+              <a id="pumlLink" class="picker-trigger secondary" href="#" target="_blank" hidden>Open model</a>
             </div>
           </div>
+
           <div id="viewer" class="viewer">
-            <div class="empty">Run UMLement to generate a diagram preview here.</div>
+            <div class="empty">
+              <div>
+                <h2>No diagram yet</h2>
+                <p>Load a local file or folder, then generate a diagram to preview it here.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="viewer-foot">
+            <span id="viewerCaptionLeft">Waiting for a generated diagram.</span>
+            <span id="viewerCaptionRight">Drag to pan when loaded.</span>
           </div>
         </section>
       </div>
@@ -264,21 +411,33 @@
 
     <script>
       const runButton = document.getElementById('runButton');
+      const resetButton = document.getElementById('resetButton');
       const pathInput = document.getElementById('path');
       const recursiveInput = document.getElementById('recursive');
       const modelOnlyInput = document.getElementById('modelOnly');
       const formatInput = document.getElementById('format');
-      const sampleProjectInput = document.getElementById('sampleProject');
       const extraPathsInput = document.getElementById('extraPaths');
       const log = document.getElementById('log');
       const status = document.getElementById('status');
+      const statusTone = document.getElementById('statusTone');
+      const statusInline = document.getElementById('statusInline');
       const viewer = document.getElementById('viewer');
       const svgLink = document.getElementById('svgLink');
       const pumlLink = document.getElementById('pumlLink');
+      const viewerCaptionLeft = document.getElementById('viewerCaptionLeft');
+      const viewerCaptionRight = document.getElementById('viewerCaptionRight');
+      const filePicker = document.getElementById('filePicker');
+      const folderPicker = document.getElementById('folderPicker');
+      const zoomInButton = document.getElementById('zoomInButton');
+      const zoomOutButton = document.getElementById('zoomOutButton');
+      const zoomResetButton = document.getElementById('zoomResetButton');
+      let viewerScale = 1;
 
-      sampleProjectInput.addEventListener('change', () => {
-        pathInput.value = sampleProjectInput.value;
-      });
+      function setStatus(message, tone) {
+        status.textContent = message;
+        statusTone.textContent = tone;
+        statusInline.textContent = tone;
+      }
 
       function renderLog(lines) {
         log.innerHTML = '';
@@ -304,19 +463,131 @@
         log.scrollTop = log.scrollHeight;
       }
 
-      function renderViewer(diagramUrl) {
-        if (!diagramUrl) {
-          viewer.innerHTML = '<div class="empty">Model-only run completed. No rendered diagram to preview.</div>';
+      function attachViewerInteractions() {
+        const stage = viewer.querySelector('.viewer-stage');
+        if (!stage) {
           return;
         }
-        viewer.innerHTML = `<iframe src="${diagramUrl}"></iframe>`;
+
+        let dragging = false;
+        let startX = 0;
+        let startY = 0;
+        let scrollLeft = 0;
+        let scrollTop = 0;
+
+        stage.addEventListener('mousedown', (event) => {
+          dragging = true;
+          stage.classList.add('is-dragging');
+          startX = event.pageX;
+          startY = event.pageY;
+          scrollLeft = stage.scrollLeft;
+          scrollTop = stage.scrollTop;
+        });
+
+        stage.addEventListener('mouseleave', () => {
+          dragging = false;
+          stage.classList.remove('is-dragging');
+        });
+
+        stage.addEventListener('mouseup', () => {
+          dragging = false;
+          stage.classList.remove('is-dragging');
+        });
+
+        stage.addEventListener('mousemove', (event) => {
+          if (!dragging) {
+            return;
+          }
+          event.preventDefault();
+          const dx = event.pageX - startX;
+          const dy = event.pageY - startY;
+          stage.scrollLeft = scrollLeft - dx;
+          stage.scrollTop = scrollTop - dy;
+        });
       }
+
+      function applyViewerScale() {
+        const canvas = viewer.querySelector('.viewer-canvas');
+        if (!canvas) {
+          return;
+        }
+        canvas.style.transform = `scale(${viewerScale})`;
+      }
+
+      function renderViewer(diagramUrl) {
+        if (!diagramUrl) {
+          viewer.innerHTML = '<div class="empty"><div><h2>Model-only run</h2><p>No rendered image was created for this run.</p></div></div>';
+          return;
+        }
+        viewer.innerHTML = `<div class="viewer-stage"><div class="viewer-canvas"><iframe src="${diagramUrl}"></iframe></div></div>`;
+        viewerScale = 1;
+        applyViewerScale();
+        attachViewerInteractions();
+      }
+
+      function resetForm() {
+        pathInput.value = '';
+        recursiveInput.checked = true;
+        modelOnlyInput.checked = false;
+        formatInput.value = 'svg';
+        extraPathsInput.value = '';
+        renderLog([]);
+        viewer.innerHTML = '<div class="empty"><div><h2>No diagram yet</h2><p>Load a local file or folder, then generate a diagram to preview it here.</p></div></div>';
+        viewerCaptionLeft.textContent = 'Waiting for a generated diagram.';
+        viewerCaptionRight.textContent = 'Drag to pan when loaded.';
+        svgLink.hidden = true;
+        pumlLink.hidden = true;
+        setStatus('Ready for a local run.', 'Idle');
+      }
+
+      function applyPickedPath(input, kind) {
+        const files = Array.from(input.files || []);
+        if (!files.length) {
+          return;
+        }
+
+        const first = files[0];
+        const browserPath = first.webkitRelativePath || first.name;
+
+        if (kind === 'folder' && first.webkitRelativePath) {
+          const folderName = first.webkitRelativePath.split('/')[0];
+          pathInput.value = folderName;
+          setStatus('Folder selected, replace with a real local path if needed.', 'Picked');
+          return;
+        }
+
+        pathInput.value = browserPath;
+        setStatus('File selected, replace with a real local path if needed.', 'Picked');
+      }
+
+      resetButton.addEventListener('click', resetForm);
+      filePicker.addEventListener('change', () => applyPickedPath(filePicker, 'file'));
+      folderPicker.addEventListener('change', () => applyPickedPath(folderPicker, 'folder'));
+      zoomInButton.addEventListener('click', () => {
+        viewerScale = Math.min(2.4, viewerScale + 0.2);
+        applyViewerScale();
+      });
+      zoomOutButton.addEventListener('click', () => {
+        viewerScale = Math.max(0.6, viewerScale - 0.2);
+        applyViewerScale();
+      });
+      zoomResetButton.addEventListener('click', () => {
+        viewerScale = 1;
+        applyViewerScale();
+        const stage = viewer.querySelector('.viewer-stage');
+        if (stage) {
+          stage.scrollTop = 0;
+          stage.scrollLeft = 0;
+        }
+      });
 
       runButton.addEventListener('click', async () => {
         runButton.disabled = true;
-        status.textContent = 'Running UMLement...';
+        setStatus('Running UMLement...', 'Working');
         renderLog([]);
-        viewer.innerHTML = '<div class="empty">Generating diagram...</div>';
+        viewer.innerHTML = '<div class="empty"><div><h2>Generating diagram</h2><p>Preparing preview artifact...</p></div></div>';
+        viewerCaptionLeft.textContent = 'Run in progress...';
+        viewerCaptionRight.textContent = 'Preview will update when ready.';
         svgLink.hidden = true;
         pumlLink.hidden = true;
 
@@ -339,15 +610,23 @@
           const data = await response.json();
           renderLog(data.progress || []);
 
-          if (!data.success) {
-            status.textContent = data.error || 'Run failed.';
-            viewer.innerHTML = `<div class="empty">${data.error || 'Run failed.'}</div>`;
+          if (!response.ok || !data.success) {
+            setStatus(data.error || 'Run failed.', 'Error');
+            viewer.innerHTML = `<div class="empty"><div><h2>Run failed</h2><p>${data.error || 'Run failed.'}</p></div></div>`;
+            viewerCaptionLeft.textContent = 'No diagram generated.';
+            viewerCaptionRight.textContent = 'Fix the input or environment and try again.';
             return;
           }
 
-          const resolvedPathCount = Array.isArray(data.resolvedPaths) ? data.resolvedPaths.length : 1;
-          status.textContent = `Run complete across ${resolvedPathCount} input ${resolvedPathCount === 1 ? 'path' : 'paths'}.`;
+          const projectLabel = data.projectLabel || 'input';
+          setStatus(`Run complete for ${projectLabel}.`, 'Done');
           renderViewer(data.diagramUrl);
+          viewerCaptionLeft.textContent = data.diagramUrl
+            ? `Loaded preview for ${projectLabel}.`
+            : `Generated model for ${projectLabel}.`;
+          viewerCaptionRight.textContent = data.diagramUrl
+            ? 'Use zoom controls or drag to navigate.'
+            : 'No rendered artifact available.';
 
           if (data.diagramUrl) {
             svgLink.href = data.diagramUrl;
@@ -358,14 +637,17 @@
             pumlLink.hidden = false;
           }
         } catch (error) {
-          status.textContent = 'Run failed unexpectedly.';
-          viewer.innerHTML = `<div class="empty">${error}</div>`;
+          setStatus('Run failed unexpectedly.', 'Error');
+          viewer.innerHTML = `<div class="empty"><div><h2>Unexpected failure</h2><p>${error}</p></div></div>`;
+          viewerCaptionLeft.textContent = 'No diagram generated.';
+          viewerCaptionRight.textContent = 'Unexpected runtime issue.';
         } finally {
           runButton.disabled = false;
         }
       });
 
       renderLog([]);
+      setStatus('Ready for a local run.', 'Idle');
     </script>
   </body>
 </html>
