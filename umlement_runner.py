@@ -1,14 +1,13 @@
 from __future__ import annotations
 
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
-import shutil
 from time import perf_counter
 from typing import Callable
 
 from constants import OUTPUT_DIR
 from umlement import UMLement
-
 
 ProgressCallback = Callable[[str, str | None], None]
 

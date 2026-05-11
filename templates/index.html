@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>UMLement Viewer</title>
     <style>
       :root {
@@ -19,7 +19,9 @@
         --border: rgba(148, 163, 184, 0.16);
         --shadow: 0 20px 60px rgba(2, 6, 23, 0.35);
       }
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
         font-family: Inter, ui-sans-serif, system-ui, sans-serif;
@@ -87,7 +89,8 @@
         color: var(--muted);
         margin-bottom: 6px;
       }
-      input, select, textarea {
+      input,
+      textarea {
         width: 100%;
         border: 1px solid var(--border);
         border-radius: 12px;
@@ -95,14 +98,12 @@
         color: var(--text);
         padding: 11px 12px;
       }
-      input:focus, select:focus, textarea:focus {
+      input:focus,
+      select:focus,
+      textarea:focus {
         outline: none;
         border-color: rgba(124, 156, 255, 0.7);
         box-shadow: 0 0 0 3px rgba(124, 156, 255, 0.14);
-      }
-      textarea {
-        min-height: 84px;
-        resize: vertical;
       }
       .picker-row,
       .option-row,
@@ -155,10 +156,28 @@
         width: auto;
         margin: 0;
       }
-      .helper {
+      .label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .label-row label {
+        margin-bottom: 0;
+      }
+      .info-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(15, 23, 42, 0.96);
         color: var(--muted);
-        font-size: 12px;
-        line-height: 1.45;
+        font-size: 11px;
+        cursor: help;
       }
       .status-box {
         border: 1px solid var(--border);
@@ -307,7 +326,10 @@
       <div class="header">
         <div>
           <h1>UMLement Viewer</h1>
-          <p>Generate and inspect UML diagrams from local Python files or folders.</p>
+          <p>
+            Generate and inspect UML diagrams from local Python files or
+            folders.
+          </p>
         </div>
         <div id="statusInline" class="status-inline">Idle</div>
       </div>
@@ -317,46 +339,63 @@
           <div class="group">
             <div class="group-title">Input</div>
             <div>
-              <label for="path">Path</label>
-              <input id="path" type="text" value="{{ default_path }}" placeholder="/Users/you/project-or-file.py">
+              <div class="label-row">
+                <label for="path">Path</label>
+                <span
+                  class="info-chip"
+                  title="Main file or folder to scan. Use the sample button for the bundled demo project."
+                  >i</span
+                >
+              </div>
+              <input
+                id="path"
+                type="text"
+                value=""
+                placeholder="/Users/you/project-or-file.py or /Users/you/project-folder"
+              />
             </div>
             <div class="picker-row">
-              <label class="picker-trigger secondary">
+              <button id="sampleButton" class="secondary" type="button">
+                Load sample project
+              </button>
+              <label
+                class="picker-trigger secondary"
+                title="Pick one or more Python files. Additional selections are included automatically in the same run."
+              >
                 Pick file
-                <input id="filePicker" type="file" accept=".py,text/x-python">
+                <input
+                  id="filePicker"
+                  type="file"
+                  accept=".py,text/x-python"
+                  multiple
+                />
               </label>
-              <label class="picker-trigger secondary">
+              <label
+                class="picker-trigger secondary"
+                title="Pick a folder to scan all Python files inside it. Use recursive scan for nested folders."
+              >
                 Pick folder
-                <input id="folderPicker" type="file" webkitdirectory directory multiple>
+                <input
+                  id="folderPicker"
+                  type="file"
+                  webkitdirectory
+                  directory
+                  multiple
+                />
               </label>
-            </div>
-            <div class="helper">If the browser does not expose a full local path, paste it manually.</div>
-            <div>
-              <label for="extraPaths">Extra paths</label>
-              <textarea id="extraPaths" placeholder="Optional additional files or folders, one per line"></textarea>
             </div>
           </div>
 
           <div class="group">
             <div class="group-title">Options</div>
             <div class="option-row">
-              <div>
-                <label for="format">Format</label>
-                <select id="format">
-                  {% for output_format in supported_output_formats %}
-                  <option value="{{ output_format }}" {% if output_format == 'svg' %}selected{% endif %}>{{ output_format|upper }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            <div class="option-row">
               <label class="check">
-                <input id="recursive" type="checkbox" checked>
-                <span>Recursive</span>
+                <input id="recursive" type="checkbox" checked />
+                <span>Recursive folder scan</span>
               </label>
               <label class="check">
-                <input id="modelOnly" type="checkbox">
-                <span>Model only</span>
+                <input id="modelOnly" type="checkbox" />
+                <span>Model only (skip image render)</span>
               </label>
             </div>
           </div>
@@ -364,7 +403,9 @@
           <div class="group">
             <div class="button-row">
               <button id="runButton">Generate</button>
-              <button id="resetButton" class="secondary" type="button">Reset</button>
+              <button id="resetButton" class="secondary" type="button">
+                Reset
+              </button>
             </div>
             <div class="status-box">
               <div class="status-line">
@@ -382,13 +423,35 @@
 
         <section class="panel viewer-panel">
           <div class="viewer-toolbar">
-            <div class="viewer-meta">Diagram preview</div>
+            <div class="viewer-meta">
+              Diagram preview (drag to pan, use +/- to zoom)
+            </div>
             <div class="viewer-actions">
-              <button id="zoomOutButton" class="secondary" type="button">−</button>
-              <button id="zoomResetButton" class="secondary" type="button">100%</button>
-              <button id="zoomInButton" class="secondary" type="button">+</button>
-              <a id="svgLink" class="picker-trigger secondary" href="#" target="_blank" hidden>Open artifact</a>
-              <a id="pumlLink" class="picker-trigger secondary" href="#" target="_blank" hidden>Open model</a>
+              <button id="zoomOutButton" class="secondary" type="button">
+                −
+              </button>
+              <button id="zoomResetButton" class="secondary" type="button">
+                100%
+              </button>
+              <button id="zoomInButton" class="secondary" type="button">
+                +
+              </button>
+              <a
+                id="svgLink"
+                class="picker-trigger secondary"
+                href="#"
+                target="_blank"
+                hidden
+                >Open artifact</a
+              >
+              <a
+                id="pumlLink"
+                class="picker-trigger secondary"
+                href="#"
+                target="_blank"
+                hidden
+                >Open model</a
+              >
             </div>
           </div>
 
@@ -396,7 +459,10 @@
             <div class="empty">
               <div>
                 <h2>No diagram yet</h2>
-                <p>Load a local file or folder, then generate a diagram to preview it here.</p>
+                <p>
+                  Load a local file or folder, then generate a diagram to
+                  preview it here.
+                </p>
               </div>
             </div>
           </div>
@@ -410,27 +476,26 @@
     </div>
 
     <script>
-      const runButton = document.getElementById('runButton');
-      const resetButton = document.getElementById('resetButton');
-      const pathInput = document.getElementById('path');
-      const recursiveInput = document.getElementById('recursive');
-      const modelOnlyInput = document.getElementById('modelOnly');
-      const formatInput = document.getElementById('format');
-      const extraPathsInput = document.getElementById('extraPaths');
-      const log = document.getElementById('log');
-      const status = document.getElementById('status');
-      const statusTone = document.getElementById('statusTone');
-      const statusInline = document.getElementById('statusInline');
-      const viewer = document.getElementById('viewer');
-      const svgLink = document.getElementById('svgLink');
-      const pumlLink = document.getElementById('pumlLink');
-      const viewerCaptionLeft = document.getElementById('viewerCaptionLeft');
-      const viewerCaptionRight = document.getElementById('viewerCaptionRight');
-      const filePicker = document.getElementById('filePicker');
-      const folderPicker = document.getElementById('folderPicker');
-      const zoomInButton = document.getElementById('zoomInButton');
-      const zoomOutButton = document.getElementById('zoomOutButton');
-      const zoomResetButton = document.getElementById('zoomResetButton');
+      const runButton = document.getElementById("runButton");
+      const resetButton = document.getElementById("resetButton");
+      const sampleButton = document.getElementById("sampleButton");
+      const pathInput = document.getElementById("path");
+      const recursiveInput = document.getElementById("recursive");
+      const modelOnlyInput = document.getElementById("modelOnly");
+      const log = document.getElementById("log");
+      const status = document.getElementById("status");
+      const statusTone = document.getElementById("statusTone");
+      const statusInline = document.getElementById("statusInline");
+      const viewer = document.getElementById("viewer");
+      const svgLink = document.getElementById("svgLink");
+      const pumlLink = document.getElementById("pumlLink");
+      const viewerCaptionLeft = document.getElementById("viewerCaptionLeft");
+      const viewerCaptionRight = document.getElementById("viewerCaptionRight");
+      const filePicker = document.getElementById("filePicker");
+      const folderPicker = document.getElementById("folderPicker");
+      const zoomInButton = document.getElementById("zoomInButton");
+      const zoomOutButton = document.getElementById("zoomOutButton");
+      const zoomResetButton = document.getElementById("zoomResetButton");
       let viewerScale = 1;
 
       function setStatus(message, tone) {
@@ -440,21 +505,21 @@
       }
 
       function renderLog(lines) {
-        log.innerHTML = '';
+        log.innerHTML = "";
         if (!lines.length) {
-          log.textContent = 'No run output yet.';
+          log.textContent = "No run output yet.";
           return;
         }
         for (const line of lines) {
-          const row = document.createElement('div');
-          row.className = 'log-line';
-          const label = document.createElement('div');
-          label.className = 'log-label';
+          const row = document.createElement("div");
+          row.className = "log-line";
+          const label = document.createElement("div");
+          label.className = "log-label";
           label.textContent = line.label;
           row.appendChild(label);
           if (line.detail) {
-            const detail = document.createElement('div');
-            detail.className = 'log-detail';
+            const detail = document.createElement("div");
+            detail.className = "log-detail";
             detail.textContent = line.detail;
             row.appendChild(detail);
           }
@@ -464,7 +529,7 @@
       }
 
       function attachViewerInteractions() {
-        const stage = viewer.querySelector('.viewer-stage');
+        const stage = viewer.querySelector(".viewer-stage");
         if (!stage) {
           return;
         }
@@ -475,26 +540,26 @@
         let scrollLeft = 0;
         let scrollTop = 0;
 
-        stage.addEventListener('mousedown', (event) => {
+        stage.addEventListener("mousedown", (event) => {
           dragging = true;
-          stage.classList.add('is-dragging');
+          stage.classList.add("is-dragging");
           startX = event.pageX;
           startY = event.pageY;
           scrollLeft = stage.scrollLeft;
           scrollTop = stage.scrollTop;
         });
 
-        stage.addEventListener('mouseleave', () => {
+        stage.addEventListener("mouseleave", () => {
           dragging = false;
-          stage.classList.remove('is-dragging');
+          stage.classList.remove("is-dragging");
         });
 
-        stage.addEventListener('mouseup', () => {
+        stage.addEventListener("mouseup", () => {
           dragging = false;
-          stage.classList.remove('is-dragging');
+          stage.classList.remove("is-dragging");
         });
 
-        stage.addEventListener('mousemove', (event) => {
+        stage.addEventListener("mousemove", (event) => {
           if (!dragging) {
             return;
           }
@@ -507,7 +572,7 @@
       }
 
       function applyViewerScale() {
-        const canvas = viewer.querySelector('.viewer-canvas');
+        const canvas = viewer.querySelector(".viewer-canvas");
         if (!canvas) {
           return;
         }
@@ -516,7 +581,8 @@
 
       function renderViewer(diagramUrl) {
         if (!diagramUrl) {
-          viewer.innerHTML = '<div class="empty"><div><h2>Model-only run</h2><p>No rendered image was created for this run.</p></div></div>';
+          viewer.innerHTML =
+            '<div class="empty"><div><h2>Model-only run</h2><p>No rendered image was created for this run.</p></div></div>';
           return;
         }
         viewer.innerHTML = `<div class="viewer-stage"><div class="viewer-canvas"><iframe src="${diagramUrl}"></iframe></div></div>`;
@@ -526,18 +592,19 @@
       }
 
       function resetForm() {
-        pathInput.value = '';
+        pathInput.value = "";
         recursiveInput.checked = true;
         modelOnlyInput.checked = false;
-        formatInput.value = 'svg';
-        extraPathsInput.value = '';
+        formatInput.value = "svg";
+        extraPathsInput.value = "";
         renderLog([]);
-        viewer.innerHTML = '<div class="empty"><div><h2>No diagram yet</h2><p>Load a local file or folder, then generate a diagram to preview it here.</p></div></div>';
-        viewerCaptionLeft.textContent = 'Waiting for a generated diagram.';
-        viewerCaptionRight.textContent = 'Drag to pan when loaded.';
+        viewer.innerHTML =
+          '<div class="empty"><div><h2>No diagram yet</h2><p>Load a local file or folder, then generate a diagram to preview it here.</p></div></div>';
+        viewerCaptionLeft.textContent = "Waiting for a generated diagram.";
+        viewerCaptionRight.textContent = "Drag to pan when loaded.";
         svgLink.hidden = true;
         pumlLink.hidden = true;
-        setStatus('Ready for a local run.', 'Idle');
+        setStatus("Ready for a local run.", "Idle");
       }
 
       function applyPickedPath(input, kind) {
@@ -549,56 +616,67 @@
         const first = files[0];
         const browserPath = first.webkitRelativePath || first.name;
 
-        if (kind === 'folder' && first.webkitRelativePath) {
-          const folderName = first.webkitRelativePath.split('/')[0];
+        if (kind === "folder" && first.webkitRelativePath) {
+          const folderName = first.webkitRelativePath.split("/")[0];
           pathInput.value = folderName;
-          setStatus('Folder selected, replace with a real local path if needed.', 'Picked');
+          setStatus(
+            "Folder selected, replace with a real local path if needed.",
+            "Picked",
+          );
           return;
         }
 
         pathInput.value = browserPath;
-        setStatus('File selected, replace with a real local path if needed.', 'Picked');
+        setStatus(
+          "File selected, replace with a real local path if needed.",
+          "Picked",
+        );
       }
 
-      resetButton.addEventListener('click', resetForm);
-      filePicker.addEventListener('change', () => applyPickedPath(filePicker, 'file'));
-      folderPicker.addEventListener('change', () => applyPickedPath(folderPicker, 'folder'));
-      zoomInButton.addEventListener('click', () => {
+      resetButton.addEventListener("click", resetForm);
+      filePicker.addEventListener("change", () =>
+        applyPickedPath(filePicker, "file"),
+      );
+      folderPicker.addEventListener("change", () =>
+        applyPickedPath(folderPicker, "folder"),
+      );
+      zoomInButton.addEventListener("click", () => {
         viewerScale = Math.min(2.4, viewerScale + 0.2);
         applyViewerScale();
       });
-      zoomOutButton.addEventListener('click', () => {
+      zoomOutButton.addEventListener("click", () => {
         viewerScale = Math.max(0.6, viewerScale - 0.2);
         applyViewerScale();
       });
-      zoomResetButton.addEventListener('click', () => {
+      zoomResetButton.addEventListener("click", () => {
         viewerScale = 1;
         applyViewerScale();
-        const stage = viewer.querySelector('.viewer-stage');
+        const stage = viewer.querySelector(".viewer-stage");
         if (stage) {
           stage.scrollTop = 0;
           stage.scrollLeft = 0;
         }
       });
 
-      runButton.addEventListener('click', async () => {
+      runButton.addEventListener("click", async () => {
         runButton.disabled = true;
-        setStatus('Running UMLement...', 'Working');
+        setStatus("Running UMLement...", "Working");
         renderLog([]);
-        viewer.innerHTML = '<div class="empty"><div><h2>Generating diagram</h2><p>Preparing preview artifact...</p></div></div>';
-        viewerCaptionLeft.textContent = 'Run in progress...';
-        viewerCaptionRight.textContent = 'Preview will update when ready.';
+        viewer.innerHTML =
+          '<div class="empty"><div><h2>Generating diagram</h2><p>Preparing preview artifact...</p></div></div>';
+        viewerCaptionLeft.textContent = "Run in progress...";
+        viewerCaptionRight.textContent = "Preview will update when ready.";
         svgLink.hidden = true;
         pumlLink.hidden = true;
 
         try {
-          const response = await fetch('/api/run', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          const response = await fetch("/api/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               path: pathInput.value,
               extraPaths: extraPathsInput.value
-                .split('\n')
+                .split("\n")
                 .map((value) => value.trim())
                 .filter(Boolean),
               recursive: recursiveInput.checked,
@@ -611,22 +689,23 @@
           renderLog(data.progress || []);
 
           if (!response.ok || !data.success) {
-            setStatus(data.error || 'Run failed.', 'Error');
-            viewer.innerHTML = `<div class="empty"><div><h2>Run failed</h2><p>${data.error || 'Run failed.'}</p></div></div>`;
-            viewerCaptionLeft.textContent = 'No diagram generated.';
-            viewerCaptionRight.textContent = 'Fix the input or environment and try again.';
+            setStatus(data.error || "Run failed.", "Error");
+            viewer.innerHTML = `<div class="empty"><div><h2>Run failed</h2><p>${data.error || "Run failed."}</p></div></div>`;
+            viewerCaptionLeft.textContent = "No diagram generated.";
+            viewerCaptionRight.textContent =
+              "Fix the input or environment and try again.";
             return;
           }
 
-          const projectLabel = data.projectLabel || 'input';
-          setStatus(`Run complete for ${projectLabel}.`, 'Done');
+          const projectLabel = data.projectLabel || "input";
+          setStatus(`Run complete for ${projectLabel}.`, "Done");
           renderViewer(data.diagramUrl);
           viewerCaptionLeft.textContent = data.diagramUrl
             ? `Loaded preview for ${projectLabel}.`
             : `Generated model for ${projectLabel}.`;
           viewerCaptionRight.textContent = data.diagramUrl
-            ? 'Use zoom controls or drag to navigate.'
-            : 'No rendered artifact available.';
+            ? "Use zoom controls or drag to navigate."
+            : "No rendered artifact available.";
 
           if (data.diagramUrl) {
             svgLink.href = data.diagramUrl;
@@ -637,17 +716,17 @@
             pumlLink.hidden = false;
           }
         } catch (error) {
-          setStatus('Run failed unexpectedly.', 'Error');
+          setStatus("Run failed unexpectedly.", "Error");
           viewer.innerHTML = `<div class="empty"><div><h2>Unexpected failure</h2><p>${error}</p></div></div>`;
-          viewerCaptionLeft.textContent = 'No diagram generated.';
-          viewerCaptionRight.textContent = 'Unexpected runtime issue.';
+          viewerCaptionLeft.textContent = "No diagram generated.";
+          viewerCaptionRight.textContent = "Unexpected runtime issue.";
         } finally {
           runButton.disabled = false;
         }
       });
 
       renderLog([]);
-      setStatus('Ready for a local run.', 'Idle');
+      setStatus("Ready for a local run.", "Idle");
     </script>
   </body>
 </html>

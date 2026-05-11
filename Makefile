@@ -2,7 +2,7 @@
 
 setup:
 	python3 -m venv .venv
-	. .venv/bin/activate && pip install -r requirements.txt -r requirements-dev.txt
+	. .venv/bin/activate && pip install -r requirements.txt
 
 verify: test typecheck lint
 

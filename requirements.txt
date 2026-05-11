@@ -1,3 +1,9 @@
 colorama==0.4.6
-types-colorama==0.4.15.20240106
 flask==3.1.2
+pytest==9.0.3
+mypy==1.18.2
+pylint==4.0.2
+pdoc3==0.11.6
+pytest-cov==7.0.0
+coveralls==4.1.0
+types-colorama==0.4.15.20240106

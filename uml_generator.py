@@ -4,7 +4,8 @@ import os
 import subprocess
 from pathlib import Path
 
-from constants import OUTPUT_DIR, PLANTUML_HEADER_LINES, PLANTUML_MODEL_NAME, RESOURCES_DIR
+from constants import (OUTPUT_DIR, PLANTUML_HEADER_LINES, PLANTUML_MODEL_NAME,
+                       RESOURCES_DIR)
 from progress_types import ProgressSink
 from uml_ast import parse_python_file
 from uml_model import UMLClass, UMLModel, UMLRelationship
