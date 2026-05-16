@@ -1,4 +1,4 @@
-.PHONY: setup test demo ui clean lint typecheck docs verify
+.PHONY: setup test demo ui ui-demo-image clean lint typecheck docs verify
 
 setup:
 	python3 -m venv .venv
@@ -13,7 +13,7 @@ lint:
 	. .venv/bin/activate && pylint $$(find . -name '*.py' -not -path './.venv/*') --exit-zero
 
 typecheck:
-	. .venv/bin/activate && mypy $$(find . -name '*.py' -not -path './.venv/*')
+	. .venv/bin/activate && mypy $$(find . -name '*.py' -not -path './.venv/*' -not -path './scripts/capture_ui_demo.py')
 
 docs:
 	. .venv/bin/activate && pdoc --force --html $$(find . -maxdepth 1 -name '*.py' -print) --output-dir docs/
@@ -23,6 +23,9 @@ demo:
 
 ui:
 	. .venv/bin/activate && python ui_app.py
+
+ui-demo-image:
+	. .capture-venv/bin/activate && python scripts/capture_ui_demo.py
 
 clean:
 	rm -rf .pytest_cache .mypy_cache models docs/*.html docs/*/*.html

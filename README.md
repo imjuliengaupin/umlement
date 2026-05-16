@@ -7,219 +7,298 @@
 
 <h3 align="center">UMLement</h3>
 
+<p>Reverse-engineer Python projects into readable UML class diagrams</p>
+
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/imjuliengaupin/umlement/devops.yml?branch=PROD&style=for-the-badge&logo=github&label=CI/CD)](https://github.com/imjuliengaupin/umlement/actions/workflows/devops.yml)
+[![Coverage](https://img.shields.io/coveralls/github/imjuliengaupin/umlement/PROD?style=for-the-badge&logo=coveralls&label=COVERAGE)](https://coveralls.io/github/imjuliengaupin/umlement?branch=PROD)
+
 <p align="center">
-  Reverse-engineer Python projects into clean UML class diagrams for architecture docs, reverse engineering, and portfolio demos.
+  <a href="#why-umlement">Why UMLement?</a> •
+  <a href="#features">Features</a> •
+  <a href="#use-cases">Use Cases</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#how-it-works">How It Works</a> •
+  <a href="#usage">Usage</a> •
+  <a href="#demo">Demo</a> •
+  <a href="#quality-reliability">Quality & Reliability</a> •
+  <a href="#license">License</a>
 </p>
-
-[![CI/CD](https://github.com/imjuliengaupin/umlement/actions/workflows/devops.yml/badge.svg?branch=PROD)](https://github.com/imjuliengaupin/umlement/actions/workflows/devops.yml)
-[![Coverage](https://coveralls.io/repos/github/imjuliengaupin/umlement/badge.svg?branch=PROD)](https://coveralls.io/github/imjuliengaupin/umlement?branch=PROD)
-
-<a href="#demo">View Demo</a>
-·
-<a href="#local-demo">Run Locally</a>
-·
-<a href="#features">Features</a>
-·
-<a href="https://github.com/imjuliengaupin/umlement/issues">Report Bug</a>
-·
-<a href="https://github.com/imjuliengaupin/umlement/issues">Request Feature</a>
 
 </div>
 
-## What it does
+<br />
 
-UMLement is a lightweight Python CLI that scans Python source files and generates:
-- a PlantUML model (`.puml`)
-- a rendered diagram (`.png` or `.svg`)
+## <a name="why-umlement">Why UMLement?</a>
 
-It is useful for:
-- visualizing class inheritance in older codebases
-- creating lightweight architecture artifacts for docs
-- reverse engineering object-oriented project structure
-- scanning an entire Python project or a hand-picked list of files/folders
-- demonstrating code-analysis and developer-tooling work in a portfolio
+When you inherit a Python codebase, the class structure is often harder to understand than the code itself. UMLement makes that first-pass architectural read faster.
 
-## :rocket: Getting Started
+It is built for:
+
+- **Fast reverse engineering** - Generate UML from Python files or folders without heavy setup
+- **Readable diagram output** - Produce PlantUML plus rendered SVG or PNG artifacts you can actually use in docs and handoff notes
+- **Practical local tooling** - Use it from the CLI or a lightweight local web UI
+- **Intentionally small scope** - Focused, useful, and not padded with feature sprawl
+
+<p align="right">
+  (<a href="#readme-top">back to top</a>)
+</p>
+
+## :gear: <a name="features">Features</a>
+
+- [x] **AST-backed class discovery**: Reverse-engineer Python source more reliably than simple text parsing
+- [x] **Relationship extraction**: Emit inheritance, composition (`has-a`), and usage edges
+- [x] **Import-aware local scanning**: Auto-include sibling modules referenced by local imports
+- [x] **Compact default UML**: Cleaner class diagrams by hiding getter/setter noise unless explicitly requested
+- [x] **Custom PlantUML styling**: Cleaner output than bare PlantUML defaults
+- [x] **SVG or PNG rendering**: Generate a PlantUML model plus a rendered image artifact
+- [x] **Recursive project scanning**: Walk folders for broader architectural coverage
+- [x] **Local viewer UI**: Preview diagrams, zoom, fit to width, drag to pan, and open generated artifacts
+- [x] **Model-only mode**: Generate `.puml` without rendering an image when you only want the source model
+- [x] **Progress reporting**: CLI and local UI both surface useful run progress
+
+<p align="right">
+  (<a href="#readme-top">back to top</a>)
+</p>
+
+## :bulb: <a name="use-cases">Use Cases</a>
+
+**Architecture discovery**
+
+- Inspect the class structure of an unfamiliar Python project
+- Understand inheritance and object composition quickly
+- Create lightweight architecture notes before deeper refactors
+
+**Documentation & handoff**
+
+- Generate UML artifacts for internal docs
+- Support project handoff with structural visuals instead of prose alone
+- Capture useful diagrams for README, docs, or portfolio walkthroughs
+
+**Developer tooling workflows**
+
+- Scan a whole folder recursively for broader project context
+- Target specific files when you only care about a subset of the codebase
+- Generate PlantUML source for further manual editing when needed
+
+<p align="right">
+  (<a href="#readme-top">back to top</a>)
+</p>
+
+## :rocket: <a name="quick-start">Quick Start</a>
 
 ### Prerequisites
 
 - Python 3.10+
 - Java
-- Graphviz
+- PlantUML jar in `resources/`
 
-### Setup
+### Installation
 
-1. Clone the repo
+```bash
+# Clone the repo
+git clone https://github.com/imjuliengaupin/umlement.git
+cd umlement
 
-   ```sh
-   git clone https://github.com/imjuliengaupin/umlement.git
-   cd umlement
-   ```
+# Create a virtual environment and install dependencies
+make setup
+```
 
-2. Create a virtual environment and install dependencies
+Add exactly one PlantUML jar to `resources/`, for example:
 
-   ```sh
-   python3 -m venv .venv
-   . .venv/bin/activate
-   pip install -r requirements.txt -r requirements-dev.txt
-   ```
+```bash
+resources/plantuml-mit-1.2023.13.jar
+```
 
-3. Ensure the PlantUML jar exists in `resources/`
+You can download a PlantUML jar from the official releases page:
 
-   The repo currently expects a PlantUML jar at:
+- <https://github.com/plantuml/plantuml/releases>
 
-   ```sh
-   resources/plantuml-*.jar
-   ```
+### Fastest run
 
-## Local demo
-
-Fastest demo path:
-
-```sh
+```bash
 make demo
 ```
 
-Tiny local UI:
-
-```sh
-make ui
-```
-Then open <http://127.0.0.1:5000>.
-
-The UI now includes three bundled sample projects so the tool can be demonstrated against different project shapes, not just one folder.
-
-Manual run with visible progress output:
-
-```sh
-. .venv/bin/activate
-python umlement.py demo --recursive --format svg --progress
-```
-
 That generates:
+
 - `models/umlement.puml`
 - `models/umlement.svg`
 
-## Usage
+### Local UI
+
+```bash
+make ui
+```
+
+Then open:
+
+- <http://127.0.0.1:5000>
+
+For the canonical README screenshot workflow:
+
+```bash
+make ui-demo-image
+```
+
+That uses a dedicated capture flow on a clean local port and refreshes:
+
+- `demo/images/ui-demo.png`
+
+<p align="right">
+  (<a href="#readme-top">back to top</a>)
+</p>
+
+## 🏗️ <a name="how-it-works">How It Works</a>
+
+UMLement follows a simple pipeline:
+
+1. **Validate input paths** - Accept Python files or folders
+2. **Discover classes with AST parsing** - Extract classes, attributes, methods, bases, and relationships
+3. **Build a PlantUML model** - Emit a `.puml` description of the discovered structure
+4. **Render the diagram** - Generate SVG or PNG using the configured PlantUML jar
+5. **Preview locally** - Use the Flask UI to inspect the generated artifact interactively
+
+### Output model behavior
+
+The current default output is intentionally compact:
+
+- dunder methods are hidden
+- getter/setter methods are hidden by default
+- getter/setter methods can be restored with an explicit option when fuller member detail is needed
+
+This keeps the default diagram more readable while preserving a path back to more verbose output.
+
+<p align="right">
+  (<a href="#readme-top">back to top</a>)
+</p>
+
+## 🧪 <a name="usage">Usage</a>
 
 ### Scan one or more files
 
-```sh
+```bash
 python umlement.py file1.py file2.py
 ```
 
-### Scan a mix of folders and files
-
-```sh
-python umlement.py demo_space_cafe demo_mech_pet/workshop.py
-```
-
-For broader reverse-engineering coverage, scanning a project folder is usually better than targeting only one leaf file.
-
 ### Scan a folder
 
-```sh
-python umlement.py demo
+```bash
+python umlement.py demo/sample_project
 ```
 
 ### Scan recursively
 
-```sh
-python umlement.py demo --recursive
+```bash
+python umlement.py demo/sample_project --recursive
 ```
 
 ### Generate SVG instead of PNG
 
-```sh
-python umlement.py demo --recursive --format svg
+```bash
+python umlement.py demo/sample_project --recursive --format svg
 ```
 
 ### Generate only the PlantUML model
 
-```sh
-python umlement.py demo --recursive --model-only
+```bash
+python umlement.py demo/sample_project --recursive --model-only
 ```
 
-### Show step-by-step status while it runs
+### Show getter/setter methods in the UML model
 
-```sh
-python umlement.py demo --recursive --format svg --progress
+```bash
+python umlement.py demo/sample_project --recursive --show-accessors
 ```
 
-## :gear: Features
+### Show progress while it runs
 
-- AST-backed class discovery for more robust Python project scanning
-- import-aware sibling module inclusion for more useful project-level reverse engineering
-- richer relationship extraction, including inheritance, has-a composition, and uses edges
-- rendered output as PNG or SVG
-- recursive folder scanning
-- mixed input support across folders and explicit Python files
-- step-by-step terminal progress output for demos
-- tiny local web UI with run controls, bundled sample projects, progress log, and SVG preview
-- CLI help/version support
-- local demo assets for quick showcase runs
-- lightweight CI for linting, type checking, tests, coverage, and docs
-
-## Why it is interesting
-
-UMLement sits in a nice niche between documentation tooling and code analysis. It is intentionally lightweight, but still useful as a practical reverse-engineering aid for Python projects.
-
-That makes it a solid reference project for:
-- static analysis ideas
-- developer tooling
-- architecture visualization
-- CLI UX and automation
-
-## Project structure
-
-```text
-.
-├── demo/                 # sample Python classes for quick demo runs
-├── models/               # generated PlantUML and diagram artifacts
-├── resources/            # PlantUML jar location
-├── tests/                # CLI and generator regression tests
-├── uml_generator.py      # model + diagram generation
-├── uml_regex.py          # regex-based parsing rules
-└── umlement.py           # CLI entrypoint
+```bash
+python umlement.py demo/sample_project --recursive --format svg --progress
 ```
 
-## Development
+### Local UI behavior notes
 
-Useful commands:
+The browser UI is designed for local runs, but one browser limitation is worth calling out:
 
-```sh
-make setup
-make test
-make demo
-make ui
-make docs
-```
+- the **Input Path** field is the authoritative runnable input
+- file/folder pickers are helper actions only
+- picker selections are shown separately as reference because browsers do not reliably expose a true absolute local path
 
-## Current limitations
+Current UI options include:
 
-This project is still intentionally lightweight.
+- **Recursive folder scan**
+- **Model only (skip image render)**
+- **Show getter/setter methods**
 
-Current tradeoffs:
-- analysis is stronger now that class discovery is AST-backed and sibling imports can be auto-included, but it is still intentionally lightweight rather than a full semantic analyzer
-- relationship extraction is best on straightforward object-oriented Python patterns and local import graphs
-- this is best positioned as a practical reverse-engineering tool, not a full type-aware architecture engine
+<p align="right">
+  (<a href="#readme-top">back to top</a>)
+</p>
 
-## Demo
+## 🎬 <a name="demo">Demo</a>
+
+### Terminal workflow
+
+The CLI demo is best shown as motion because the progress output is part of the product experience.
 
 ![](./demo/images/demo.gif)
 
-![](./demo/images/demo.png)
+<br />
 
-## Contributing
+### Local viewer UI
 
-If you find this project interesting and want to share your own enhancements or bugfixes, contributions are welcome.
+The local UI is best shown as a crisp static image because screenshots preserve interface quality much better than GIFs.
 
-1. Fork the project
-2. Create your feature branch `git checkout -b feature/branchname`
-3. Commit your changes `git commit -m 'description'`
-4. Push your feature branch `git push origin feature/branchname`
-5. Open a pull request
+![](./demo/images/ui-demo.png)
 
-## License
+<p align="right">
+  (<a href="#readme-top">back to top</a>)
+</p>
+
+## 💪🏼 <a name="quality-reliability">Quality & Reliability</a>
+
+- **AST-backed scanning**: More robust than regex-only reverse engineering for Python class discovery
+- **Typed regression coverage**: Pytest and mypy are part of the regular verification flow
+- **Reproducible demo workflow**: Dedicated screenshot capture keeps UI/demo assets consistent
+- **Pragmatic scope**: Small surface area, explicit tradeoffs, and no unnecessary feature sprawl
+
+Useful development commands:
+
+```bash
+make setup
+make test
+make lint
+make typecheck
+make verify
+make demo
+make ui
+make ui-demo-image
+```
+
+### Project structure
+
+```text
+.
+├── demo/                    # sample project + demo assets
+├── models/                  # generated PlantUML and rendered artifacts
+├── resources/               # PlantUML jar location
+├── scripts/                 # local demo/screenshot helpers
+├── templates/               # Flask UI template
+├── tests/                   # regression tests
+├── ui_app.py                # local Flask viewer
+├── uml_ast.py               # AST-based Python structure extraction
+├── uml_generator.py         # PlantUML model + diagram generation
+├── umlement.py              # CLI entrypoint
+└── umlement_runner.py       # reusable programmatic runner
+```
+
+<p align="right">
+  (<a href="#readme-top">back to top</a>)
+</p>
+
+## :pencil: <a name="license">License</a>
 
 Distributed under the MIT License. See `LICENSE` for more information.
+
+<p align="right">
+  (<a href="#readme-top">back to top</a>)
+</p>

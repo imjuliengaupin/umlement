@@ -1,4 +1,4 @@
-Output ../images/demo-portfolio.gif
+Output ../images/demo.gif
 
 Set Shell "bash"
 Set WindowBar Colorful
@@ -17,5 +17,5 @@ Type "cd /Users/path/to/umlement" Enter
 Sleep 500ms
 Type "source .venv/bin/activate" Enter
 Sleep 500ms
-Type "python umlement.py demo --recursive --format svg --progress" Enter
+Type "python umlement.py demo/sample_project --recursive --format svg --progress" Enter
 Sleep 8s

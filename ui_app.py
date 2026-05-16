@@ -30,10 +30,9 @@ def run() -> Any:
     recursive = bool(payload.get("recursive", True))
     output_format = "svg"
     model_only = bool(payload.get("modelOnly", False))
+    show_accessors = bool(payload.get("showAccessors", False))
 
     progress_lines: list[dict[str, str | None]] = []
-    resolved_paths = [raw_path]
-
     def capture(label: str, detail: str | None = None) -> None:
         progress_lines.append({"label": label, "detail": detail})
 
@@ -42,6 +41,7 @@ def run() -> Any:
         recursive=recursive,
         output_format=output_format,
         model_only=model_only,
+        show_accessors=show_accessors,
         progress_callback=capture,
     )
 
@@ -60,11 +60,7 @@ def run() -> Any:
             "progress": progress_lines,
             "diagramUrl": diagram_url,
             "modelUrl": model_url,
-            "resolvedPaths": resolved_paths,
-            "inputCount": len(resolved_paths),
             "projectLabel": Path(raw_path).name or raw_path,
-            "outputFormat": output_format,
-            "modelOnly": model_only,
         }
     )
 

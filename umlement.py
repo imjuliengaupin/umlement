@@ -17,9 +17,9 @@ from umlement_progress import ProgressReporter
 
 
 class UMLement:
-    def __init__(self, progress_enabled: bool = False, progress: ProgressSink | None = None) -> None:
+    def __init__(self, progress_enabled: bool = False, progress: ProgressSink | None = None, show_accessors: bool = False) -> None:
         self.progress: ProgressSink = progress or ProgressReporter(enabled=progress_enabled)
-        self.generator: UMLGenerator = UMLGenerator(progress=self.progress)
+        self.generator: UMLGenerator = UMLGenerator(progress=self.progress, show_accessors=show_accessors)
 
     def generate_class_inheritance_model(self) -> Path:
         return self.generator.generate_class_inheritance_model()
@@ -106,6 +106,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Show step-by-step status output while running",
     )
     parser.add_argument(
+        "--show-accessors",
+        action="store_true",
+        help="Include getter and setter methods in generated UML members",
+    )
+    parser.add_argument(
         "--version",
         action="version",
         version="UMLement 0.2.0",
@@ -118,7 +123,7 @@ def main(argv: list[str] | None = None) -> int:
     init()
 
     try:
-        script = UMLement(progress_enabled=args.progress)
+        script = UMLement(progress_enabled=args.progress, show_accessors=args.show_accessors)
         argvs_validated = script.validate_argvs_provided(args.paths, recursive=args.recursive)
 
         if not argvs_validated:

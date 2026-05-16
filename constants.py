@@ -9,6 +9,7 @@ PLANTUML_HEADER_LINES: tuple[str, ...] = (
     "skinparam defaultFontName Inter",
     "skinparam defaultFontSize 13",
     "skinparam linetype polyline",
+    "left to right direction",
     "skinparam ArrowColor #64748B",
     "skinparam ArrowThickness 1.3",
     "skinparam ArrowFontColor #475569",

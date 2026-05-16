@@ -67,3 +67,46 @@ def test_generate_class_inheritance_model_applies_custom_style_and_hides_dunder_
     assert "class DemoRunner <<entrypoint>>" in model_text
     assert "DemoRunner : +execute()" in model_text
     assert "DemoRunner : +__init__()" not in model_text
+
+
+def test_generate_class_inheritance_model_hides_accessors_by_default(tmp_path: Path) -> None:
+    source_file = tmp_path / "coin.py"
+    source_file.write_text(
+        "class Coin(object):\n"
+        "    def get_value(self):\n"
+        "        return 1\n"
+        "    def set_value(self, value):\n"
+        "        self.value = value\n"
+        "    def spend(self):\n"
+        "        return True\n",
+        encoding="utf-8",
+    )
+
+    generator = UMLGenerator()
+    generator.py_files = [str(source_file)]
+
+    model_text = generator.generate_class_inheritance_model().read_text(encoding="utf-8")
+
+    assert "Coin : +get_value()" not in model_text
+    assert "Coin : +set_value()" not in model_text
+    assert "Coin : +spend()" in model_text
+
+
+def test_generate_class_inheritance_model_can_show_accessors(tmp_path: Path) -> None:
+    source_file = tmp_path / "coin.py"
+    source_file.write_text(
+        "class Coin(object):\n"
+        "    def get_value(self):\n"
+        "        return 1\n"
+        "    def set_value(self, value):\n"
+        "        self.value = value\n",
+        encoding="utf-8",
+    )
+
+    generator = UMLGenerator(show_accessors=True)
+    generator.py_files = [str(source_file)]
+
+    model_text = generator.generate_class_inheritance_model().read_text(encoding="utf-8")
+
+    assert "Coin : +get_value()" in model_text
+    assert "Coin : +set_value()" in model_text

@@ -37,3 +37,23 @@ def test_run_umlement_model_only_returns_model_path(tmp_path: Path) -> None:
     assert result.model_path is not None
     assert result.diagram_path is None
     assert any("Run complete" in label for label, _ in events)
+
+
+def test_run_umlement_can_show_accessors_when_requested(tmp_path: Path) -> None:
+    source_file = tmp_path / "sample.py"
+    source_file.write_text(
+        "class Demo(object):\n"
+        "    def get_value(self):\n"
+        "        return 1\n"
+        "    def set_value(self, value):\n"
+        "        self.value = value\n",
+        encoding="utf-8",
+    )
+
+    result = run_umlement([str(source_file)], model_only=True, show_accessors=True)
+
+    assert result.success is True
+    assert result.model_path is not None
+    model_text = Path(result.model_path).read_text(encoding="utf-8")
+    assert "Demo : +get_value()" in model_text
+    assert "Demo : +set_value()" in model_text

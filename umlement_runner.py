@@ -48,9 +48,9 @@ class CallbackProgressReporter:
             self.callback(rendered, detail)
 
 
-def run_umlement(paths: list[str], recursive: bool = False, output_format: str = "svg", model_only: bool = False, progress_callback: ProgressCallback | None = None) -> RunResult:
+def run_umlement(paths: list[str], recursive: bool = False, output_format: str = "svg", model_only: bool = False, show_accessors: bool = False, progress_callback: ProgressCallback | None = None) -> RunResult:
     progress = CallbackProgressReporter(progress_callback)
-    script = UMLement(progress_enabled=False)
+    script = UMLement(progress_enabled=False, show_accessors=show_accessors)
     script.progress = progress
     script.generator.progress = progress
 

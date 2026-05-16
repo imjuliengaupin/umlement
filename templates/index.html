@@ -144,8 +144,31 @@
         text-decoration: underline;
         text-underline-offset: 3px;
       }
-      .path-helper {
-        margin-top: 3px;
+      .picker-selection {
+        margin-top: 8px;
+        padding: 8px 10px;
+        border: 1px solid rgba(148, 163, 184, 0.08);
+        border-radius: 10px;
+        background: rgba(8, 15, 28, 0.42);
+        display: grid;
+        gap: 3px;
+      }
+      .picker-selection-label {
+        color: var(--muted);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .picker-selection-value {
+        color: var(--soft);
+        font-size: 12px;
+        word-break: break-word;
+      }
+      .picker-hint {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.4;
       }
       label {
         display: block;
@@ -200,25 +223,6 @@
       }
       .group.options-group {
         margin-top: 12px;
-      }
-      .help-popover {
-        position: absolute;
-        top: calc(100% + 8px);
-        right: 0;
-        width: 240px;
-        padding: 10px 12px;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        background: rgba(15, 23, 42, 0.98);
-        color: var(--soft);
-        font-size: 11px;
-        line-height: 1.5;
-        box-shadow: var(--shadow);
-        opacity: 0;
-        pointer-events: none;
-        transform: translateY(-4px);
-        transition: opacity 120ms ease, transform 120ms ease;
-        z-index: 10;
       }
       .picker-row > *,
       .option-row > *,
@@ -307,45 +311,6 @@
       }
       .label-row label {
         margin-bottom: 0;
-      }
-      .info-chip-wrap {
-        position: relative;
-        display: inline-flex;
-      }
-      .info-chip {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 18px;
-        height: 18px;
-        border-radius: 999px;
-        border: 1px solid var(--border);
-        background: rgba(15, 23, 42, 0.96);
-        color: var(--muted);
-        font-size: 11px;
-        cursor: pointer;
-      }
-      .info-chip-wrap:hover .help-popover,
-      .info-chip-wrap:focus-within .help-popover {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translateY(0);
-      }
-      .status-box {
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 12px;
-        background: rgba(8, 15, 28, 0.75);
-      }
-      .status-line {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        font-size: 13px;
-      }
-      .status-tone {
-        color: var(--success);
-        font-weight: 600;
       }
       .log {
         border: 1px solid rgba(148, 163, 184, 0.08);
@@ -441,7 +406,7 @@
       .viewer {
         border: 1px solid var(--border);
         border-radius: 16px;
-        background: white;
+        background: #F8FAFC;
         overflow: hidden;
       }
       .viewer-stage {
@@ -449,7 +414,7 @@
         height: 860px;
         overflow: auto;
         cursor: grab;
-        background: white;
+        background: #F8FAFC;
       }
       .viewer-stage.is-dragging {
         cursor: grabbing;
@@ -465,7 +430,7 @@
         width: auto;
         height: auto;
         max-width: none;
-        background: white;
+        background: #F8FAFC;
         pointer-events: none;
         user-select: none;
       }
@@ -538,6 +503,11 @@
                   value=""
                   placeholder="Paste a file or folder path"
                 />
+                <div id="pickerSelection" class="picker-selection" hidden>
+                  <span class="picker-selection-label">Selected via picker</span>
+                  <span id="pickerSelectionValue" class="picker-selection-value"></span>
+                </div>
+                <div id="pickerHint" class="picker-hint">Picker selections appear below for reference, but local runs still need a real absolute path.</div>
               </div>
               <div class="picker-row">
                 <label
@@ -578,6 +548,10 @@
                 <label class="check" title="Generate the PlantUML model only and skip creating the rendered SVG preview artifact.">
                   <input id="modelOnly" type="checkbox" />
                   <span>Model only (skip image render)</span>
+                </label>
+                <label class="check" title="Include getter and setter methods in the generated UML members instead of using the compact default view.">
+                  <input id="showAccessors" type="checkbox" />
+                  <span>Show getter/setter methods</span>
                 </label>
               </div>
             </div>
@@ -642,11 +616,6 @@
             </div>
           </div>
 
-          <div class="viewer-foot">
-            <span id="viewerCaptionLeft">Waiting for a generated diagram.</span>
-            <span id="viewerCaptionRight">Drag to pan when loaded.</span>
-          </div>
-
           <div class="group">
             <div id="log" class="log"></div>
           </div>
@@ -662,13 +631,14 @@
       const pathInput = document.getElementById("path");
       const recursiveInput = document.getElementById("recursive");
       const modelOnlyInput = document.getElementById("modelOnly");
+      const showAccessorsInput = document.getElementById("showAccessors");
+      const pickerSelection = document.getElementById("pickerSelection");
+      const pickerSelectionValue = document.getElementById("pickerSelectionValue");
       const log = document.getElementById("log");
       const statusInline = document.getElementById("statusInline");
       const viewer = document.getElementById("viewer");
       const svgLink = document.getElementById("svgLink");
       const pumlLink = document.getElementById("pumlLink");
-      const viewerCaptionLeft = document.getElementById("viewerCaptionLeft");
-      const viewerCaptionRight = document.getElementById("viewerCaptionRight");
       const filePicker = document.getElementById("filePicker");
       const folderPicker = document.getElementById("folderPicker");
       const zoomInButton = document.getElementById("zoomInButton");
@@ -780,11 +750,9 @@
         const svg = viewer.querySelector("svg");
         if (!stage || !svg) return;
         const availableWidth = Math.max(320, stage.clientWidth - 24);
-        const availableHeight = Math.max(320, stage.clientHeight - 24);
         const box = svg.viewBox.baseVal;
         const svgWidth = box && box.width ? box.width : svg.getBoundingClientRect().width || 1200;
-        const svgHeight = box && box.height ? box.height : svg.getBoundingClientRect().height || 900;
-        const fitted = Math.min(1, Math.max(0.25, Math.min(availableWidth / svgWidth, availableHeight / svgHeight)));
+        const fitted = Math.min(1, Math.max(0.25, availableWidth / svgWidth));
         minViewerScale = 0.2;
         fittedViewerScale = fitted;
         viewerScale = fitted;
@@ -811,8 +779,6 @@
 
       function resetViewer() {
         viewer.innerHTML = '<div class="empty"><div><h2>No diagram yet</h2><p>Load a local file or folder, then generate a diagram to preview it here.</p></div></div>';
-        viewerCaptionLeft.textContent = "Waiting for a generated diagram.";
-        viewerCaptionRight.textContent = "Drag to pan when loaded.";
         setActionLink(svgLink, null);
         setActionLink(pumlLink, null);
       }
@@ -821,8 +787,11 @@
         pathInput.value = "";
         recursiveInput.checked = false;
         modelOnlyInput.checked = false;
+        showAccessorsInput.checked = false;
         filePicker.value = "";
         folderPicker.value = "";
+        pickerSelection.hidden = true;
+        pickerSelectionValue.textContent = "";
         renderLog([]);
         viewerScale = 1;
         fittedViewerScale = 1;
@@ -836,24 +805,22 @@
         if (!files.length) return;
 
         const first = files[0];
+        pickerSelection.hidden = false;
 
         if (kind === "folder") {
           const folderName = first.webkitRelativePath ? first.webkitRelativePath.split("/")[0] : first.name;
-          pathInput.value = folderName || "";
-          pathInput.scrollLeft = 0;
+          pickerSelectionValue.textContent = `Folder: ${folderName || ""}`;
           setStatus("Folder selected. Browser pickers usually expose only the folder name here, not the full local path.", "Picked");
           return;
         }
 
         if (files.length === 1) {
-          pathInput.value = first.name || "";
-          pathInput.scrollLeft = 0;
+          pickerSelectionValue.textContent = `File: ${first.name || ""}`;
           setStatus("File selected. Browser pickers usually expose only the file name here, not the full local path.", "Picked");
           return;
         }
 
-        pathInput.value = files.map((file) => file.name).join(", ");
-        pathInput.scrollLeft = 0;
+        pickerSelectionValue.textContent = `Files: ${files.map((file) => file.name).join(", ")}`;
         setStatus(`${files.length} files selected. Browser pickers usually expose only file names here, not full local paths.`, "Picked");
       }
 
@@ -862,6 +829,8 @@
         pathInput.value = SAMPLE_PATH;
         filePicker.value = "";
         folderPicker.value = "";
+        pickerSelection.hidden = true;
+        pickerSelectionValue.textContent = "";
         setStatus("Sample project loaded.", "Sample");
       });
 
@@ -906,8 +875,6 @@
           renderLog([]);
           resetViewer();
           viewer.innerHTML = '<div class="empty"><div><h2>Path required</h2><p>Paste a local path, use Load sample project, or try a picker helper first.</p></div></div>';
-          viewerCaptionLeft.textContent = "No diagram generated.";
-          viewerCaptionRight.textContent = "Path input is required.";
           return;
         }
 
@@ -915,8 +882,6 @@
         setStatus("Running UMLement...", "Working");
         renderLog([]);
         viewer.innerHTML = '<div class="empty"><div><h2>Generating diagram</h2><p>Preparing preview artifact...</p></div></div>';
-        viewerCaptionLeft.textContent = "Run in progress...";
-        viewerCaptionRight.textContent = "Preview will update when ready.";
         setActionLink(svgLink, null);
         setActionLink(pumlLink, null);
 
@@ -928,6 +893,7 @@
               path,
               recursive: recursiveInput.checked,
               modelOnly: modelOnlyInput.checked,
+              showAccessors: showAccessorsInput.checked,
             }),
           });
 
@@ -937,28 +903,17 @@
           if (!response.ok || !data.success) {
             setStatus(data.error || "Run failed.", "Error");
             viewer.innerHTML = `<div class="empty"><div><h2>Run failed</h2><p>${data.error || "Run failed."}</p></div></div>`;
-            viewerCaptionLeft.textContent = "No diagram generated.";
-            viewerCaptionRight.textContent = "Fix the input or environment and try again.";
             return;
           }
 
           const projectLabel = data.projectLabel || "input";
           setStatus(`Run complete for ${projectLabel}.`, "Done");
           await renderViewer(data.diagramUrl);
-          viewerCaptionLeft.textContent = data.diagramUrl
-            ? `Loaded preview for ${projectLabel}.`
-            : `Generated model for ${projectLabel}.`;
-          viewerCaptionRight.textContent = data.diagramUrl
-            ? "Use zoom controls or drag to navigate."
-            : "No rendered artifact available.";
-
           setActionLink(svgLink, data.diagramUrl || null);
           setActionLink(pumlLink, data.modelUrl || null);
         } catch (error) {
           setStatus("Run failed unexpectedly.", "Error");
           viewer.innerHTML = `<div class="empty"><div><h2>Unexpected failure</h2><p>${error}</p></div></div>`;
-          viewerCaptionLeft.textContent = "No diagram generated.";
-          viewerCaptionRight.textContent = "Unexpected runtime issue.";
         } finally {
           runButton.disabled = false;
         }

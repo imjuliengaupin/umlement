@@ -13,9 +13,10 @@ from umlement_progress import ProgressReporter
 
 
 class UMLGenerator:
-    def __init__(self, progress: ProgressSink | None = None) -> None:
+    def __init__(self, progress: ProgressSink | None = None, show_accessors: bool = False) -> None:
         self.py_files: list[str] = []
         self.progress = progress or ProgressReporter(enabled=False)
+        self.show_accessors = show_accessors
 
     def get_output_model_path(self) -> Path:
         return Path(OUTPUT_DIR) / PLANTUML_MODEL_NAME
@@ -80,31 +81,26 @@ class UMLGenerator:
         model = self.build_model()
         known_classes = model.class_names()
 
-        package_map: dict[str, list[UMLClass]] = {}
-        for uml_class in model.classes:
-            package_map.setdefault(uml_class.package, []).append(uml_class)
-
         with open(output_model_path, "w", encoding="utf8") as plantuml_file:
             plantuml_file.write("@startuml\n")
             for line in PLANTUML_HEADER_LINES:
                 plantuml_file.write(f"{line}\n")
             plantuml_file.write("skinparam classAttributeIconSize 0\n")
             plantuml_file.write("hide empty members\n")
-            plantuml_file.write("left to right direction\n")
             plantuml_file.write("\n")
 
-            for package_name, classes in sorted(package_map.items()):
-                plantuml_file.write(f"package {package_name} {{\n")
-                for uml_class in classes:
-                    stereotype = " <<entrypoint>>" if uml_class.name.lower().endswith(("app", "cli", "runner")) else ""
-                    plantuml_file.write(f"class {uml_class.name}{stereotype}\n")
-                    for attribute in uml_class.attributes:
-                        plantuml_file.write(f"{uml_class.name} : +{attribute}\n")
-                    for method in uml_class.methods:
-                        if method.startswith("__") and method.endswith("__"):
-                            continue
-                        plantuml_file.write(f"{uml_class.name} : +{method}()\n")
-                plantuml_file.write("}\n\n")
+            for uml_class in model.classes:
+                stereotype = " <<entrypoint>>" if uml_class.name.lower().endswith(("app", "cli", "runner")) else ""
+                plantuml_file.write(f"class {uml_class.name}{stereotype}\n")
+                for attribute in uml_class.attributes:
+                    plantuml_file.write(f"{uml_class.name} : +{attribute}\n")
+                for method in uml_class.methods:
+                    if method.startswith("__") and method.endswith("__"):
+                        continue
+                    if not self.show_accessors and method.startswith(("get_", "set_")):
+                        continue
+                    plantuml_file.write(f"{uml_class.name} : +{method}()\n")
+                plantuml_file.write("\n")
 
             emitted_relationships: set[tuple[str, str, str, str | None]] = set()
             for uml_class in model.classes:
