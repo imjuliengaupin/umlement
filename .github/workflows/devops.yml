@@ -104,7 +104,7 @@ jobs:
         run: |
           pip install pdoc3 --quiet
           pip install -r requirements.txt --quiet
-          pdoc --force --html $(git ls-files "*.py") --output-dir docs/
+          pdoc --force --html $(git ls-files "*.py" ':!:scripts/capture_ui_demo.py') --output-dir docs/
 
       - name: Upload code documentation artifact
         uses: actions/upload-artifact@v4
