@@ -1,3 +1,5 @@
+"""Shared paths and PlantUML styling constants for UMLement output generation."""
+
 OUTPUT_DIR: str = "./models"
 PLANTUML_MODEL_NAME: str = "umlement.puml"
 RESOURCES_DIR: str = "./resources"

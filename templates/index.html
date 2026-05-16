@@ -7,6 +7,8 @@
     <style>
       :root {
         color-scheme: dark;
+        --page-top: #07111f;
+        --page-bottom: #0f172a;
         --panel: rgba(12, 22, 38, 0.92);
         --panel-2: rgba(15, 23, 42, 0.92);
         --text: #e5eefc;
@@ -16,8 +18,52 @@
         --accent-2: #38bdf8;
         --success: #34d399;
         --danger: #f87171;
+        --warn: #fcd34d;
         --border: rgba(148, 163, 184, 0.16);
         --shadow: 0 20px 60px rgba(2, 6, 23, 0.35);
+        --section-title: #9fb0c8;
+        --section-divider: rgba(148, 163, 184, 0.08);
+        --link: #93c5fd;
+        --link-hover: #dbeafe;
+        --input-bg: rgba(6, 12, 22, 0.96);
+        --input-border: rgba(148, 163, 184, 0.12);
+        --picker-bg: rgba(8, 15, 28, 0.42);
+        --control-bg: rgba(15, 23, 42, 0.82);
+        --control-hover: rgba(30, 41, 59, 0.98);
+        --control-border: rgba(148, 163, 184, 0.12);
+        --control-text: #e5eefc;
+        --control-secondary-bg: rgba(10, 18, 32, 0.82);
+        --control-secondary-text: var(--soft);
+      }
+      body[data-theme="light"] {
+        color-scheme: light;
+        --page-top: #eff6ff;
+        --page-bottom: #dbeafe;
+        --panel: rgba(255, 255, 255, 0.96);
+        --panel-2: rgba(248, 250, 252, 0.98);
+        --text: #0f172a;
+        --muted: #475569;
+        --soft: #334155;
+        --accent: #2563eb;
+        --accent-2: #0284c7;
+        --success: #059669;
+        --danger: #dc2626;
+        --warn: #b45309;
+        --border: rgba(15, 23, 42, 0.10);
+        --shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+        --section-title: #475569;
+        --section-divider: rgba(15, 23, 42, 0.08);
+        --link: #1d4ed8;
+        --link-hover: #1e40af;
+        --input-bg: rgba(255, 255, 255, 0.98);
+        --input-border: rgba(148, 163, 184, 0.32);
+        --picker-bg: rgba(226, 232, 240, 0.65);
+        --control-bg: rgba(255, 255, 255, 0.96);
+        --control-hover: rgba(241, 245, 249, 0.98);
+        --control-border: rgba(148, 163, 184, 0.34);
+        --control-text: #1e293b;
+        --control-secondary-bg: rgba(248, 250, 252, 0.98);
+        --control-secondary-text: #334155;
       }
       * {
         box-sizing: border-box;
@@ -25,7 +71,7 @@
       body {
         margin: 0;
         font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-        background: linear-gradient(180deg, #07111f 0%, #0f172a 100%);
+        background: linear-gradient(180deg, var(--page-top) 0%, var(--page-bottom) 100%);
         color: var(--text);
       }
       .wrap {
@@ -39,6 +85,11 @@
         align-items: flex-start;
         gap: 12px;
         margin-bottom: 12px;
+      }
+      .header-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
       }
       .header h1 {
         margin: 0;
@@ -57,7 +108,7 @@
         padding: 8px 12px;
         border: 1px solid var(--border);
         border-radius: 999px;
-        background: rgba(15, 23, 42, 0.92);
+        background: var(--panel-2);
         color: var(--soft);
         font-size: 12px;
         white-space: nowrap;
@@ -72,8 +123,25 @@
       .status-inline[data-tone="Working"] { color: #bfdbfe; }
       .status-inline[data-tone="Done"] { color: var(--success); }
       .status-inline[data-tone="Error"] { color: var(--danger); }
-      .status-inline[data-tone="Sample"],
-      .status-inline[data-tone="Picked"] { color: #fcd34d; }
+      .status-inline[data-tone="Needs input"] { color: var(--warn); }
+      .theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 42px;
+        height: 36px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        color: var(--soft);
+        cursor: pointer;
+        font-size: 16px;
+        transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+      }
+      .theme-toggle:hover {
+        transform: translateY(-1px);
+        border-color: rgba(124, 156, 255, 0.36);
+      }
       .layout {
         display: grid;
         grid-template-columns: 300px minmax(0, 1fr);
@@ -85,6 +153,7 @@
         border-radius: 18px;
         padding: 14px;
         box-shadow: var(--shadow);
+        min-width: 0;
       }
       .controls.panel {
         padding: 12px;
@@ -114,7 +183,7 @@
       }
       .group-title {
         margin: 0 0 2px;
-        color: #9fb0c8;
+        color: var(--section-title);
         font-size: 10px;
         font-weight: 700;
         letter-spacing: 0.14em;
@@ -126,49 +195,39 @@
         justify-content: space-between;
         gap: 8px;
         padding-bottom: 6px;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+        border-bottom: 1px solid var(--section-divider);
         margin-bottom: 4px;
       }
       .subtle-link {
         display: inline-flex;
         align-items: center;
         width: fit-content;
-        color: #93c5fd;
+        color: var(--link);
         font-size: 12px;
         font-weight: 600;
         text-decoration: none;
         padding: 2px 0;
       }
       .subtle-link:hover {
-        color: #dbeafe;
+        color: var(--link-hover);
         text-decoration: underline;
         text-underline-offset: 3px;
       }
-      .picker-selection {
-        margin-top: 8px;
-        padding: 8px 10px;
-        border: 1px solid rgba(148, 163, 184, 0.08);
-        border-radius: 10px;
-        background: rgba(8, 15, 28, 0.42);
-        display: grid;
-        gap: 3px;
-      }
-      .picker-selection-label {
+      .subtle-link.is-disabled {
         color: var(--muted);
-        font-size: 10px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-      .picker-selection-value {
-        color: var(--soft);
-        font-size: 12px;
-        word-break: break-word;
+        pointer-events: none;
+        text-decoration: none;
+        opacity: 0.55;
       }
       .picker-hint {
         margin-top: 6px;
         color: var(--muted);
         font-size: 11px;
         line-height: 1.4;
+      }
+      .picker-hint.needs-path {
+        color: var(--warn);
+        font-weight: 600;
       }
       label {
         display: block;
@@ -179,9 +238,9 @@
       input,
       textarea {
         width: 100%;
-        border: 1px solid rgba(148, 163, 184, 0.12);
+        border: 1px solid var(--input-border);
         border-radius: 12px;
-        background: rgba(6, 12, 22, 0.96);
+        background: var(--input-bg);
         color: var(--text);
         padding: 11px 12px;
       }
@@ -189,6 +248,11 @@
         overflow-x: auto;
         white-space: nowrap;
         text-overflow: clip;
+      }
+      #path.needs-path {
+        border-color: rgba(245, 158, 11, 0.9);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18);
+        background: linear-gradient(180deg, var(--input-bg) 0%, color-mix(in srgb, var(--input-bg) 82%, #fbbf24 18%) 100%);
       }
       input:focus,
       select:focus,
@@ -204,6 +268,13 @@
       .viewer-actions {
         display: flex;
         gap: 8px;
+      }
+      .viewer-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
       }
       .picker-row,
       .button-row,
@@ -231,13 +302,13 @@
       }
       .picker-trigger,
       button {
-        border: 1px solid rgba(148, 163, 184, 0.12);
+        border: 1px solid var(--control-border);
         border-radius: 10px;
         padding: 9px 12px;
         min-height: 40px;
         font-weight: 600;
-        background: rgba(15, 23, 42, 0.82);
-        color: #e5eefc;
+        background: var(--control-bg);
+        color: var(--control-text);
         cursor: pointer;
         box-shadow: 0 0 0 rgba(59, 130, 246, 0);
         transform: translateY(0);
@@ -245,10 +316,22 @@
       }
       .picker-trigger:hover,
       button:hover {
-        background: rgba(30, 41, 59, 0.98);
+        background: var(--control-hover);
         border-color: rgba(124, 156, 255, 0.28);
         transform: translateY(-1px);
         box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+      }
+      .picker-trigger[aria-disabled="true"],
+      .picker-trigger[aria-disabled="true"]:hover,
+      .picker-trigger[aria-disabled="true"]:active {
+        background: var(--control-secondary-bg);
+        border-color: var(--control-border);
+        color: var(--muted);
+        transform: translateY(0);
+        box-shadow: none;
+        transition: none;
+        filter: none;
+        pointer-events: none;
       }
       .picker-trigger:active,
       button:active {
@@ -257,9 +340,9 @@
       }
       button.secondary,
       .picker-trigger.secondary {
-        background: rgba(10, 18, 32, 0.82);
-        border: 1px solid rgba(148, 163, 184, 0.12);
-        color: var(--soft);
+        background: var(--control-secondary-bg);
+        border: 1px solid var(--control-border);
+        color: var(--control-secondary-text);
       }
       button.primary {
         background: #2563eb;
@@ -297,6 +380,9 @@
         width: auto;
         margin: 0;
       }
+      .check[aria-disabled="true"] {
+        opacity: 0.55;
+      }
       .option-list {
         display: grid;
         gap: 2px;
@@ -313,6 +399,7 @@
         margin-bottom: 0;
       }
       .log {
+        margin-top: 12px;
         border: 1px solid rgba(148, 163, 184, 0.08);
         border-radius: 14px;
         background: #040914;
@@ -362,15 +449,32 @@
         margin-left: 18px;
         word-break: break-word;
       }
+      body[data-theme="light"] .log {
+        background: #e2e8f0;
+        border-color: rgba(100, 116, 139, 0.28);
+      }
+      body[data-theme="light"] .log-label {
+        color: #334155;
+      }
+      body[data-theme="light"] .log::before {
+        color: #64748b;
+      }
+      body[data-theme="light"] .log-detail {
+        color: #475569;
+      }
       .viewer-panel {
         display: grid;
         gap: 10px;
+        min-width: 0;
       }
       .viewer-toolbar {
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         gap: 10px;
         padding-bottom: 2px;
+        min-width: 0;
+        flex-wrap: wrap;
+        width: 100%;
       }
       .viewer-meta {
         color: var(--muted);
@@ -381,7 +485,11 @@
         flex-wrap: wrap;
         justify-content: flex-end;
         align-items: center;
+        align-content: flex-start;
         gap: 6px;
+        min-width: 0;
+        flex: 1 1 420px;
+        max-width: 100%;
       }
       .zoom-group {
         display: inline-flex;
@@ -408,6 +516,8 @@
         border-radius: 16px;
         background: #F8FAFC;
         overflow: hidden;
+        width: 100%;
+        min-width: 0;
       }
       .viewer-stage {
         width: 100%;
@@ -415,15 +525,18 @@
         overflow: auto;
         cursor: grab;
         background: #F8FAFC;
+        box-sizing: border-box;
       }
       .viewer-stage.is-dragging {
         cursor: grabbing;
       }
       .viewer-canvas {
-        width: fit-content;
+        display: inline-block;
+        width: max-content;
         min-width: 100%;
         min-height: 100%;
         transform-origin: top left;
+        box-sizing: border-box;
       }
       .viewer-canvas svg {
         display: block;
@@ -433,6 +546,46 @@
         background: #F8FAFC;
         pointer-events: none;
         user-select: none;
+      }
+      .drop-overlay {
+        position: absolute;
+        inset: 12px;
+        border: 2px dashed rgba(124, 156, 255, 0.45);
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.76);
+        color: #dbeafe;
+        display: none;
+        place-items: center;
+        text-align: center;
+        padding: 24px;
+        z-index: 3;
+      }
+      .viewer.is-dragover .drop-overlay {
+        display: grid;
+      }
+      .viewer-shell {
+        position: relative;
+        min-width: 0;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      .viewer-tabs {
+        display: inline-flex;
+        gap: 6px;
+        min-width: 0;
+        flex: 0 0 auto;
+      }
+      .model-panel {
+        min-height: 860px;
+        max-height: 860px;
+        overflow: auto;
+        padding: 18px;
+        background: #f8fafc;
+        color: #0f172a;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        line-height: 1.6;
+        white-space: pre-wrap;
       }
       .empty {
         min-height: 860px;
@@ -482,13 +635,15 @@
     <div class="wrap">
       <div class="header">
         <div>
-          <h1>UMLement Viewer</h1>
+          <h1>UMLement</h1>
           <p>
             Generate and inspect UML diagrams from local Python files or
             folders.
           </p>
         </div>
-        <div id="statusInline" class="status-inline" data-tone="Idle">Idle</div>
+        <div class="header-actions">
+          <button id="themeToggle" class="theme-toggle" type="button" title="Toggle light and dark theme" aria-label="Toggle theme">☾</button>
+        </div>
       </div>
 
       <div class="layout">
@@ -503,11 +658,7 @@
                   value=""
                   placeholder="Paste a file or folder path"
                 />
-                <div id="pickerSelection" class="picker-selection" hidden>
-                  <span class="picker-selection-label">Selected via picker</span>
-                  <span id="pickerSelectionValue" class="picker-selection-value"></span>
-                </div>
-                <div id="pickerHint" class="picker-hint">Picker selections appear below for reference, but local runs still need a real absolute path.</div>
+                <div id="pickerHint" class="picker-hint">Pick a file or folder to preload its name here, but local runs still need the full absolute path.</div>
               </div>
               <div class="picker-row">
                 <label
@@ -539,12 +690,18 @@
             </div>
 
             <div class="group options-group">
-              <div class="section-head"><div class="group-title">Options</div></div>
+              <div class="section-head"><div class="group-title">Scan</div></div>
               <div class="option-row option-list">
                 <label class="check" title="Scan nested folders inside the selected directory instead of only the top level.">
                   <input id="recursive" type="checkbox" />
                   <span>Recursive folder scan</span>
                 </label>
+              </div>
+            </div>
+
+            <div class="group options-group">
+              <div class="section-head"><div class="group-title">Output</div></div>
+              <div class="option-row option-list">
                 <label class="check" title="Generate the PlantUML model only and skip creating the rendered SVG preview artifact.">
                   <input id="modelOnly" type="checkbox" />
                   <span>Model only (skip image render)</span>
@@ -568,8 +725,15 @@
         </section>
 
         <section class="panel viewer-panel">
+          <div class="viewer-meta">
+            <div id="statusInline" class="status-inline" data-tone="Idle">Idle</div>
+          </div>
+
           <div class="viewer-toolbar">
-            
+            <div class="viewer-tabs">
+              <button id="diagramTabButton" class="secondary" type="button">Diagram</button>
+              <button id="modelTabButton" class="secondary" type="button">Model</button>
+            </div>
             <div class="viewer-actions">
               <div class="zoom-group">
                 <button id="zoomOutButton" class="secondary" type="button">
@@ -582,6 +746,7 @@
                   +
                 </button>
               </div>
+              <button id="fitModeButton" class="picker-trigger secondary action-link" type="button">Fit: Width</button>
               <div id="zoomValue" class="picker-trigger secondary zoom-readout" aria-live="polite">100%</div>
               <a
                 id="svgLink"
@@ -604,8 +769,10 @@
             </div>
           </div>
 
-          <div id="viewer" class="viewer">
-            <div class="empty">
+          <div class="viewer-shell">
+            <div id="viewer" class="viewer">
+              <div id="dropOverlay" class="drop-overlay"><div><strong>Drop Python files or a folder here</strong><p>UMLement will load the selection names as a helper, but you may still need to paste the full absolute path above.</p></div></div>
+              <div class="empty">
               <div>
                 <h2>No diagram yet</h2>
                 <p>
@@ -632,8 +799,7 @@
       const recursiveInput = document.getElementById("recursive");
       const modelOnlyInput = document.getElementById("modelOnly");
       const showAccessorsInput = document.getElementById("showAccessors");
-      const pickerSelection = document.getElementById("pickerSelection");
-      const pickerSelectionValue = document.getElementById("pickerSelectionValue");
+      const pickerHint = document.getElementById("pickerHint");
       const log = document.getElementById("log");
       const statusInline = document.getElementById("statusInline");
       const viewer = document.getElementById("viewer");
@@ -645,14 +811,49 @@
       const zoomOutButton = document.getElementById("zoomOutButton");
       const zoomResetButton = document.getElementById("zoomResetButton");
       const zoomValue = document.getElementById("zoomValue");
+      const themeToggle = document.getElementById("themeToggle");
+      const fitModeButton = document.getElementById("fitModeButton");
+      const diagramTabButton = document.getElementById("diagramTabButton");
+      const modelTabButton = document.getElementById("modelTabButton");
+      const dropOverlay = document.getElementById("dropOverlay");
+      const recursiveOptionLabel = recursiveInput.closest("label");
       let viewerScale = 1;
       let minViewerScale = 0.25;
       let fittedViewerScale = 1;
+      let fitMode = "width";
+      let activeViewerTab = "diagram";
+      let latestDiagramUrl = null;
+      let latestModelUrl = null;
 
       function setStatus(message, tone) {
         statusInline.textContent = tone;
         statusInline.dataset.tone = tone;
         statusInline.title = message;
+      }
+
+      function hasRunnableAbsolutePath() {
+        const value = pathInput.value.trim();
+        if (!value) return false;
+        return value.startsWith("/") || /^[A-Za-z]:[\\/]/.test(value);
+      }
+
+      function refreshRunAvailability() {
+        const hasAnyPathText = Boolean(pathInput.value.trim());
+        const pickerNeedsPath = hasAnyPathText && !hasRunnableAbsolutePath();
+        pathInput.classList.toggle("needs-path", pickerNeedsPath);
+        pickerHint.classList.toggle("needs-path", pickerNeedsPath);
+        pickerHint.textContent = pickerNeedsPath
+          ? "Complete the full absolute path in the Input Path field above, then generate the diagram."
+          : "Pick a file or folder to preload its name here, but local runs still need the full absolute path.";
+        if (pickerNeedsPath) {
+          runButton.disabled = true;
+          setStatus("A file or folder name is loaded, but a full absolute path is still required before generating.", "Needs input");
+          return;
+        }
+        runButton.disabled = false;
+        if (!pathInput.value.trim()) {
+          setStatus("Ready for a local run.", "Idle");
+        }
       }
 
       function setActionLink(link, href) {
@@ -667,6 +868,48 @@
         link.hidden = false;
         link.classList.remove("is-disabled");
         link.setAttribute("aria-disabled", "false");
+      }
+
+      function setInlineDisplay(element, visible) {
+        element.style.display = visible ? "inline-flex" : "none";
+      }
+
+      function clearPickerInputs() {
+        filePicker.value = "";
+        folderPicker.value = "";
+      }
+
+      function syncRecursiveAvailability(mode = "path") {
+        // Recursive scanning only changes directory traversal behavior, so it should
+        // disappear for file-only selections instead of silently doing nothing.
+        const disableRecursive = mode === "files";
+        recursiveInput.checked = disableRecursive ? false : recursiveInput.checked;
+        recursiveInput.disabled = disableRecursive;
+        recursiveOptionLabel?.setAttribute("aria-disabled", disableRecursive ? "true" : "false");
+      }
+
+      function syncViewerControls() {
+        // The toolbar reflects the active tab rather than exposing every possible
+        // control at once. Diagram-only affordances stay hidden in model view.
+        const hasDiagram = Boolean(viewer.querySelector(".viewer-stage"));
+        const hasModel = Boolean(latestModelUrl);
+        const inDiagramView = activeViewerTab === "diagram";
+        const inModelView = activeViewerTab === "model";
+        zoomInButton.disabled = !hasDiagram;
+        zoomOutButton.disabled = !hasDiagram;
+        zoomResetButton.disabled = !hasDiagram;
+        zoomValue.classList.toggle("is-disabled", !hasDiagram);
+        zoomValue.setAttribute("aria-disabled", hasDiagram ? "false" : "true");
+        fitModeButton.disabled = !hasDiagram;
+        diagramTabButton.disabled = !latestDiagramUrl;
+        modelTabButton.disabled = !hasModel;
+        setInlineDisplay(zoomInButton, inDiagramView);
+        setInlineDisplay(zoomOutButton, inDiagramView);
+        setInlineDisplay(zoomResetButton, inDiagramView);
+        setInlineDisplay(zoomValue, inDiagramView);
+        setInlineDisplay(fitModeButton, inDiagramView);
+        setInlineDisplay(svgLink, inDiagramView && Boolean(latestDiagramUrl));
+        setInlineDisplay(pumlLink, inModelView && hasModel);
       }
 
       function renderLog(lines) {
@@ -745,25 +988,44 @@
         zoomValue.textContent = `${Math.round(viewerScale * 100)}%`;
       }
 
+      function syncThemeToggle() {
+        themeToggle.textContent = document.body.dataset.theme === "light" ? "☀" : "☾";
+      }
+
+      function syncFitModeButton() {
+        fitModeButton.textContent = fitMode === "full" ? "Fit: Full" : "Fit: Width";
+      }
+
       function fitViewerToStage() {
         const stage = viewer.querySelector(".viewer-stage");
+        // Initial fit is intentionally conservative. A wide getter/setter-heavy
+        // diagram should stay comfortably inside the viewer instead of hugging
+        // the border just because width-only fit would allow it.
         const svg = viewer.querySelector("svg");
         if (!stage || !svg) return;
-        const availableWidth = Math.max(320, stage.clientWidth - 24);
+        const availableWidth = Math.max(280, stage.clientWidth - 32);
+        const availableHeight = Math.max(280, stage.clientHeight - 32);
         const box = svg.viewBox.baseVal;
         const svgWidth = box && box.width ? box.width : svg.getBoundingClientRect().width || 1200;
-        const fitted = Math.min(1, Math.max(0.25, availableWidth / svgWidth));
-        minViewerScale = 0.2;
-        fittedViewerScale = fitted;
-        viewerScale = fitted;
+        const svgHeight = box && box.height ? box.height : svg.getBoundingClientRect().height || 1200;
+        const widthFit = Math.min(1, Math.max(0.25, availableWidth / svgWidth));
+        const heightFit = Math.min(1, Math.max(0.25, availableHeight / svgHeight));
+        const fitted = fitMode === "full" ? Math.min(widthFit, heightFit) : widthFit;
+        const nextScale = Math.min(fitted, 0.8);
+        minViewerScale = Math.min(0.2, nextScale);
+        fittedViewerScale = nextScale;
+        viewerScale = nextScale;
         applyViewerScale();
-        stage.scrollLeft = 0;
-        stage.scrollTop = 0;
+        requestAnimationFrame(() => {
+          stage.scrollLeft = 0;
+          stage.scrollTop = 0;
+        });
       }
 
       async function renderViewer(diagramUrl) {
         if (!diagramUrl) {
           viewer.innerHTML = '<div class="empty"><div><h2>Model-only run</h2><p>No rendered image was created for this run.</p></div></div>';
+          syncViewerControls();
           return;
         }
 
@@ -774,13 +1036,53 @@
         fittedViewerScale = 1;
         applyViewerScale();
         attachViewerInteractions();
+        syncViewerControls();
         requestAnimationFrame(() => fitViewerToStage());
       }
 
+      async function renderModelViewer(modelUrl) {
+        if (!modelUrl) {
+          viewer.innerHTML = '<div class="empty"><div><h2>No model yet</h2><p>Generate a run to inspect the PlantUML text here.</p></div></div>';
+          syncViewerControls();
+          return;
+        }
+        const response = await fetch(modelUrl);
+        const modelText = await response.text();
+        viewer.innerHTML = `<pre class="model-panel">${modelText.replace(/[&<>]/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]))}</pre>`;
+        syncViewerControls();
+      }
+
+      async function showViewerTab(tab) {
+        activeViewerTab = tab;
+        if (tab === "model") await renderModelViewer(latestModelUrl);
+        else await renderViewer(latestDiagramUrl);
+      }
+
       function resetViewer() {
-        viewer.innerHTML = '<div class="empty"><div><h2>No diagram yet</h2><p>Load a local file or folder, then generate a diagram to preview it here.</p></div></div>';
+        viewer.innerHTML = '<div class="empty"><div><h2>No diagram yet</h2><p>Load a local file or folder, then generate a diagram to preview it here. You can also drop Python files or a folder here to preload the name as a helper.</p></div></div>';
+        latestDiagramUrl = null;
+        latestModelUrl = null;
+        activeViewerTab = "diagram";
         setActionLink(svgLink, null);
         setActionLink(pumlLink, null);
+        syncViewerControls();
+      }
+
+      function syncOutputOptions() {
+        // Model-only runs should always include accessor lines because the
+        // generated .puml itself changes when accessors are enabled.
+        const lockAccessors = modelOnlyInput.checked;
+        showAccessorsInput.checked = lockAccessors;
+        showAccessorsInput.disabled = lockAccessors;
+      }
+
+      function setInputSelectorsEnabled(enabled) {
+        sampleLink.classList.toggle("is-disabled", !enabled);
+        sampleLink.setAttribute("aria-disabled", enabled ? "false" : "true");
+        filePicker.disabled = !enabled;
+        folderPicker.disabled = !enabled;
+        filePicker.parentElement?.setAttribute("aria-disabled", enabled ? "false" : "true");
+        folderPicker.parentElement?.setAttribute("aria-disabled", enabled ? "false" : "true");
       }
 
       function resetForm() {
@@ -788,16 +1090,18 @@
         recursiveInput.checked = false;
         modelOnlyInput.checked = false;
         showAccessorsInput.checked = false;
-        filePicker.value = "";
-        folderPicker.value = "";
-        pickerSelection.hidden = true;
-        pickerSelectionValue.textContent = "";
+        syncOutputOptions();
+        clearPickerInputs();
         renderLog([]);
         viewerScale = 1;
         fittedViewerScale = 1;
         zoomValue.textContent = "100%";
         resetViewer();
+        setInputSelectorsEnabled(true);
+        syncRecursiveAvailability();
+        runButton.disabled = false;
         setStatus("Ready for a local run.", "Idle");
+        refreshRunAvailability();
       }
 
       function applyPickedPath(input, kind) {
@@ -805,39 +1109,98 @@
         if (!files.length) return;
 
         const first = files[0];
-        pickerSelection.hidden = false;
 
         if (kind === "folder") {
           const folderName = first.webkitRelativePath ? first.webkitRelativePath.split("/")[0] : first.name;
-          pickerSelectionValue.textContent = `Folder: ${folderName || ""}`;
-          setStatus("Folder selected. Browser pickers usually expose only the folder name here, not the full local path.", "Picked");
+          pathInput.value = folderName || "";
+          syncRecursiveAvailability("folder");
+          refreshRunAvailability();
           return;
         }
 
+        syncRecursiveAvailability("files");
         if (files.length === 1) {
-          pickerSelectionValue.textContent = `File: ${first.name || ""}`;
-          setStatus("File selected. Browser pickers usually expose only the file name here, not the full local path.", "Picked");
+          pathInput.value = first.name || "";
+          refreshRunAvailability();
           return;
         }
 
-        pickerSelectionValue.textContent = `Files: ${files.map((file) => file.name).join(", ")}`;
-        setStatus(`${files.length} files selected. Browser pickers usually expose only file names here, not full local paths.`, "Picked");
+        pathInput.value = files.map((file) => file.name).join(", ");
+        refreshRunAvailability();
       }
+
+      function handleDroppedFiles(files) {
+        if (!files.length) return;
+        syncRecursiveAvailability("files");
+        pathInput.value = files.length === 1 ? files[0].name : files.map((file) => file.name).join(", ");
+        refreshRunAvailability();
+      }
+
+      themeToggle.addEventListener("click", () => {
+        document.body.dataset.theme = document.body.dataset.theme === "light" ? "dark" : "light";
+        syncThemeToggle();
+      });
+
+      fitModeButton.addEventListener("click", () => {
+        const stage = viewer.querySelector(".viewer-stage");
+        const svg = viewer.querySelector("svg");
+        if (!stage || !svg) {
+          syncFitModeButton();
+          return;
+        }
+        fitMode = fitMode === "full" ? "width" : "full";
+        syncFitModeButton();
+        fitViewerToStage();
+      });
+
+      modelOnlyInput.addEventListener("change", syncOutputOptions);
 
       sampleLink.addEventListener("click", (event) => {
         event.preventDefault();
+        if (sampleLink.getAttribute("aria-disabled") === "true") return;
+        // Demo-path mode and picker-helper mode should not compete with each
+        // other, so the helper pickers go inactive until reset.
         pathInput.value = SAMPLE_PATH;
-        filePicker.value = "";
-        folderPicker.value = "";
-        pickerSelection.hidden = true;
-        pickerSelectionValue.textContent = "";
-        setStatus("Sample project loaded.", "Sample");
+        clearPickerInputs();
+        syncRecursiveAvailability("folder");
+        filePicker.parentElement?.setAttribute("aria-disabled", "true");
+        folderPicker.parentElement?.setAttribute("aria-disabled", "true");
+        filePicker.disabled = true;
+        folderPicker.disabled = true;
+        refreshRunAvailability();
+        setStatus("Demo project loaded.", "Ready");
       });
 
       pathInput.addEventListener("input", () => {
         if (!pathInput.value.trim()) {
           resetForm();
+          return;
         }
+        syncRecursiveAvailability();
+        refreshRunAvailability();
+      });
+
+      diagramTabButton.addEventListener("click", async () => {
+        if (!latestDiagramUrl) return;
+        await showViewerTab("diagram");
+      });
+      modelTabButton.addEventListener("click", async () => {
+        if (!latestModelUrl) return;
+        await showViewerTab("model");
+      });
+
+      [viewer, dropOverlay].forEach((el) => {
+        el.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          viewer.classList.add("is-dragover");
+        });
+        el.addEventListener("dragleave", () => viewer.classList.remove("is-dragover"));
+        el.addEventListener("drop", (event) => {
+          event.preventDefault();
+          viewer.classList.remove("is-dragover");
+          const files = Array.from(event.dataTransfer?.files || []);
+          handleDroppedFiles(files);
+        });
       });
 
       resetButton.addEventListener("click", resetForm);
@@ -868,17 +1231,22 @@
         applyViewerScale();
       });
 
+      syncThemeToggle();
+      syncFitModeButton();
+      syncViewerControls();
+
       runButton.addEventListener("click", async () => {
         const path = pathInput.value.trim();
         if (!path) {
           setStatus("Provide a file or folder path first.", "Needs input");
           renderLog([]);
           resetViewer();
-          viewer.innerHTML = '<div class="empty"><div><h2>Path required</h2><p>Paste a local path, use Load sample project, or try a picker helper first.</p></div></div>';
+          viewer.innerHTML = '<div class="empty"><div><h2>Path required</h2><p>Paste a local path, use Load Demo Project, or preload a name with the picker first.</p></div></div>';
           return;
         }
 
         runButton.disabled = true;
+        setInputSelectorsEnabled(false);
         setStatus("Running UMLement...", "Working");
         renderLog([]);
         viewer.innerHTML = '<div class="empty"><div><h2>Generating diagram</h2><p>Preparing preview artifact...</p></div></div>';
@@ -907,10 +1275,18 @@
           }
 
           const projectLabel = data.projectLabel || "input";
-          setStatus(`Run complete for ${projectLabel}.`, "Done");
-          await renderViewer(data.diagramUrl);
+          latestDiagramUrl = data.diagramUrl || null;
+          latestModelUrl = data.modelUrl || null;
           setActionLink(svgLink, data.diagramUrl || null);
           setActionLink(pumlLink, data.modelUrl || null);
+          setStatus(`Run complete for ${projectLabel}.`, "Done");
+          // Model-only runs should not strand the user in an empty diagram tab.
+          const nextTab = !latestDiagramUrl && latestModelUrl
+            ? "model"
+            : activeViewerTab === "model" && latestModelUrl
+              ? "model"
+              : "diagram";
+          await showViewerTab(nextTab);
         } catch (error) {
           setStatus("Run failed unexpectedly.", "Error");
           viewer.innerHTML = `<div class="empty"><div><h2>Unexpected failure</h2><p>${error}</p></div></div>`;
@@ -921,7 +1297,13 @@
 
       renderLog([]);
       resetViewer();
+      syncOutputOptions();
+      setInputSelectorsEnabled(true);
+      syncRecursiveAvailability();
       setStatus("Ready for a local run.", "Idle");
+      refreshRunAvailability();
+      syncFitModeButton();
+      syncViewerControls();
     </script>
   </body>
 </html>

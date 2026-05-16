@@ -1,3 +1,5 @@
+"""AST parsing helpers that extract class, method, and relationship metadata from Python files."""
+
 from __future__ import annotations
 
 import ast
@@ -7,11 +9,13 @@ from pathlib import Path
 
 @dataclass
 class MethodInfo:
+    """Normalized method metadata captured from a class body."""
     name: str
 
 
 @dataclass
 class RelationshipInfo:
+    """Relationship metadata inferred from inheritance or attribute usage."""
     target: str
     kind: str
     via: str | None = None
@@ -19,6 +23,7 @@ class RelationshipInfo:
 
 @dataclass
 class ClassInfo:
+    """Intermediate class representation produced directly from AST traversal."""
     name: str
     package: str
     bases: list[str] = field(default_factory=list)
@@ -29,6 +34,8 @@ class ClassInfo:
 
 
 class ClassVisitor(ast.NodeVisitor):
+    """Visit class definitions and collect UML-relevant structure from each file."""
+
     def __init__(self, package: str, imported_names: dict[str, str]) -> None:
         self.package = package
         self.imported_names = imported_names
@@ -52,6 +59,9 @@ class ClassVisitor(ast.NodeVisitor):
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802
         if not self._current_class:
             return
+        # Relationship inference is intentionally lightweight. We look for common
+        # constructor-style assignments and in-method calls instead of trying to
+        # fully solve Python's runtime dynamism.
         self._current_class.methods.append(MethodInfo(name=node.name))
         for child in ast.walk(node):
             if isinstance(child, ast.Assign):
@@ -77,6 +87,7 @@ class ClassVisitor(ast.NodeVisitor):
     def _capture_relationship_from_assignment(self, target: ast.expr, value: ast.expr) -> None:
         if not self._current_class:
             return
+        # `self.attr = SomeClass(...)` is the clearest signal for a has-a edge.
         if isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name) and target.value.id == "self":
             relationship = self._relationship_target_from_value(value)
             if relationship:
@@ -104,6 +115,8 @@ class ClassVisitor(ast.NodeVisitor):
     def _resolve_name(self, name: str) -> str:
         if not name:
             return ""
+        # Imported aliases collapse back to their final symbol names so the UML
+        # surface stays readable even when source modules use local aliasing.
         if name in self.imported_names:
             return self.imported_names[name].split(".")[-1]
         return name.split(".")[-1]
@@ -122,6 +135,7 @@ class ClassVisitor(ast.NodeVisitor):
 
 
 def parse_imports(tree: ast.AST) -> dict[str, str]:
+    """Build a lookup of locally-referenced import names to their source modules."""
     imported_names: dict[str, str] = {}
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
@@ -135,6 +149,7 @@ def parse_imports(tree: ast.AST) -> dict[str, str]:
 
 
 def parse_python_file(path: str | Path) -> list[ClassInfo]:
+    """Parse one Python file and return discovered classes plus inferred relationships."""
     source_path = Path(path)
     module_name = source_path.stem
     tree = ast.parse(source_path.read_text(encoding="utf-8"), filename=str(source_path))

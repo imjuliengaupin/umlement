@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""CLI entry point and orchestration layer for local UMLement runs."""
 
 from __future__ import annotations
 
@@ -17,17 +18,27 @@ from umlement_progress import ProgressReporter
 
 
 class UMLement:
-    def __init__(self, progress_enabled: bool = False, progress: ProgressSink | None = None, show_accessors: bool = False) -> None:
+    """Coordinate input validation plus model and diagram generation work."""
+
+    def __init__(
+        self,
+        progress_enabled: bool = False,
+        progress: ProgressSink | None = None,
+        show_accessors: bool = False,
+    ) -> None:
         self.progress: ProgressSink = progress or ProgressReporter(enabled=progress_enabled)
         self.generator: UMLGenerator = UMLGenerator(progress=self.progress, show_accessors=show_accessors)
 
     def generate_class_inheritance_model(self) -> Path:
+        """Generate the PlantUML model artifact for the current run."""
         return self.generator.generate_class_inheritance_model()
 
     def generate_class_inheritance_diagram(self, output_format: str = "png") -> Path:
+        """Render the current PlantUML model into a diagram artifact."""
         return self.generator.generate_class_inheritance_diagram(output_format=output_format)
 
     def _append_python_path(self, path: Path) -> None:
+        """Queue one supported Python file path for downstream model generation."""
         if path.is_file() and path.suffix.lower() == ".py":
             resolved = str(path.resolve())
             if resolved not in self.generator.py_files:
@@ -39,6 +50,7 @@ class UMLement:
         print(rf"{Fore.LIGHTBLACK_EX}{path} ignored, non-python files are unsupported{Style.RESET_ALL}")
 
     def validate_argvs_provided(self, argvs_provided: list[str], recursive: bool = False) -> bool:
+        """Validate CLI-style input paths and expand directories into Python file lists."""
         min_argvs_required: int = 1
 
         if len(argvs_provided) < min_argvs_required:
@@ -78,6 +90,7 @@ class UMLement:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the CLI argument parser for local UMLement execution."""
     parser = argparse.ArgumentParser(
         description="Generate PlantUML class diagrams from Python source files.",
     )
@@ -119,6 +132,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the UMLement CLI and return a shell-friendly exit status code."""
     args = build_parser().parse_args(argv)
     init()
 

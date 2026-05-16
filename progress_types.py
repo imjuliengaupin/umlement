@@ -1,9 +1,12 @@
+"""Protocol definitions for pluggable UMLement progress reporting."""
+
 from __future__ import annotations
 
 from typing import Protocol
 
 
 class ProgressSink(Protocol):
+    """Minimal progress-reporting surface shared by CLI and UI adapters."""
     def start(self, label: str, detail: str | None = None) -> None: ...
     def advance(self, label: str, detail: str | None = None) -> None: ...
     def complete(self, label: str, detail: str | None = None) -> None: ...

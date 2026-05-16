@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from flask import Flask, jsonify, render_template, request, send_file
+from werkzeug.wrappers.response import Response
 
 from umlement_runner import run_umlement
 
@@ -17,6 +18,7 @@ app = Flask(__name__)
 
 @app.get("/")
 def index() -> str:
+    """Render the local UMLement browser UI."""
     return render_template(
         "index.html",
         default_path=DEFAULT_PATH,
@@ -25,6 +27,7 @@ def index() -> str:
 
 @app.post("/api/run")
 def run() -> Any:
+    """Execute a UMLement run and return artifact metadata for the UI."""
     payload = request.get_json(silent=True) or {}
     raw_path = str(payload.get("path") or DEFAULT_PATH)
     recursive = bool(payload.get("recursive", True))
@@ -33,7 +36,9 @@ def run() -> Any:
     show_accessors = bool(payload.get("showAccessors", False))
 
     progress_lines: list[dict[str, str | None]] = []
+
     def capture(label: str, detail: str | None = None) -> None:
+        """Collect structured progress updates for incremental UI rendering."""
         progress_lines.append({"label": label, "detail": detail})
 
     result = run_umlement(
@@ -66,7 +71,8 @@ def run() -> Any:
 
 
 @app.get("/artifacts/<path:name>")
-def artifacts(name: str):
+def artifacts(name: str) -> Response:
+    """Serve generated model and diagram artifacts from the local models directory."""
     artifact_path = MODELS_DIR / name
     return send_file(artifact_path)
 

@@ -1,11 +1,12 @@
+"""Build PlantUML models and rendered diagrams from discovered Python source files."""
+
 from __future__ import annotations
 
 import os
 import subprocess
 from pathlib import Path
 
-from constants import (OUTPUT_DIR, PLANTUML_HEADER_LINES, PLANTUML_MODEL_NAME,
-                       RESOURCES_DIR)
+from constants import OUTPUT_DIR, PLANTUML_HEADER_LINES, PLANTUML_MODEL_NAME, RESOURCES_DIR
 from progress_types import ProgressSink
 from uml_ast import parse_python_file
 from uml_model import UMLClass, UMLModel, UMLRelationship
@@ -13,27 +14,45 @@ from umlement_progress import ProgressReporter
 
 
 class UMLGenerator:
-    def __init__(self, progress: ProgressSink | None = None, show_accessors: bool = False) -> None:
+    """Translate parsed Python files into PlantUML model and diagram artifacts."""
+
+    def __init__(
+        self,
+        progress: ProgressSink | None = None,
+        show_accessors: bool = False,
+    ) -> None:
         self.py_files: list[str] = []
         self.progress = progress or ProgressReporter(enabled=False)
         self.show_accessors = show_accessors
 
     def get_output_model_path(self) -> Path:
+        """Return the canonical PlantUML model output path."""
         return Path(OUTPUT_DIR) / PLANTUML_MODEL_NAME
 
     def get_output_diagram_path(self, extension: str = ".png") -> Path:
+        """Return the rendered diagram path for the requested file extension."""
         return self.get_output_model_path().with_suffix(extension)
 
     def _get_plantuml_jar_path(self) -> str:
+        """Locate the single PlantUML jar bundled in the local resources directory."""
         jars = sorted(jar for jar in os.listdir(RESOURCES_DIR) if jar.endswith(".jar"))
         if len(jars) > 1:
-            raise Exception("multiple .jar files found in the resources directory, please remove all but one and try again")
+            raise Exception(
+                "multiple .jar files found in the resources directory, "
+                "please remove all but one and try again"
+            )
         if not jars:
-            raise Exception("no .jar file found in the resources directory, please add and try again")
+            raise Exception(
+                "no .jar file found in the resources directory, "
+                "please add and try again"
+            )
         return f"{RESOURCES_DIR}/{jars[0]}"
 
     def _expand_import_neighbor_files(self) -> None:
+        """Auto-include sibling Python modules imported by already-queued source files."""
         discovered = set(self.py_files)
+        # Neighbor auto-inclusion keeps small local projects readable in the UI
+        # without requiring users to manually enumerate every imported sibling.
         added = True
         while added:
             added = False
@@ -53,6 +72,7 @@ class UMLGenerator:
         self.py_files = sorted(discovered)
 
     def build_model(self) -> UMLModel:
+        """Parse queued Python files and assemble the in-memory UML model."""
         self._expand_import_neighbor_files()
         model = UMLModel()
         for py_file in self.py_files:
@@ -67,7 +87,12 @@ class UMLGenerator:
                         attributes=item.attributes,
                         methods=[method.name for method in item.methods],
                         relationships=[
-                            UMLRelationship(source=item.name, target=relationship.target, kind=relationship.kind, via=relationship.via)
+                            UMLRelationship(
+                                source=item.name,
+                                target=relationship.target,
+                                kind=relationship.kind,
+                                via=relationship.via,
+                            )
                             for relationship in item.relationships
                         ],
                     )
@@ -75,6 +100,7 @@ class UMLGenerator:
         return model
 
     def generate_class_inheritance_model(self) -> Path:
+        """Write a PlantUML model file for the currently queued Python sources."""
         self.progress.advance("Preparing model generation", f"{len(self.py_files)} Python file(s) queued")
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         output_model_path = self.get_output_model_path()
@@ -95,8 +121,12 @@ class UMLGenerator:
                 for attribute in uml_class.attributes:
                     plantuml_file.write(f"{uml_class.name} : +{attribute}\n")
                 for method in uml_class.methods:
+                    # Dunder methods add noise for this utility's intended
+                    # reverse-engineering view, so they stay hidden.
                     if method.startswith("__") and method.endswith("__"):
                         continue
+                    # Accessors are an explicit opt-in because the compact view is
+                    # the default portfolio-friendly presentation.
                     if not self.show_accessors and method.startswith(("get_", "set_")):
                         continue
                     plantuml_file.write(f"{uml_class.name} : +{method}()\n")
@@ -109,6 +139,8 @@ class UMLGenerator:
                     if base_name and base_name != "object":
                         plantuml_file.write(f"{base_name} <|-- {uml_class.name}\n")
                 for relationship in uml_class.relationships:
+                    # Only emit relationships that resolve to classes inside the
+                    # current model, otherwise the diagram picks up noisy phantom edges.
                     if relationship.target not in known_classes or relationship.target == uml_class.name:
                         continue
                     key = (relationship.source, relationship.target, relationship.kind, relationship.via)
@@ -127,6 +159,7 @@ class UMLGenerator:
         return output_model_path
 
     def generate_class_inheritance_diagram(self, output_format: str = "png") -> Path:
+        """Render the generated PlantUML model into the requested output image format."""
         self.progress.advance("Rendering diagram", f"output format: {output_format}")
         plantuml_jar = self._get_plantuml_jar_path()
         plantuml_model = str(self.get_output_model_path())

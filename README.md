@@ -221,14 +221,19 @@ python umlement.py demo/sample_project --recursive --format svg --progress
 The browser UI is designed for local runs, but one browser limitation is worth calling out:
 
 - the **Input Path** field is the authoritative runnable input
-- file/folder pickers are helper actions only
-- picker selections are shown separately as reference because browsers do not reliably expose a true absolute local path
+- file/folder pickers preload names only, because browsers do not reliably expose a true absolute local path
+- the path still needs to be completed manually before the run can start
 
 Current UI options include:
 
-- **Recursive folder scan**
+- **Recursive folder scan** (folder-oriented runs only)
 - **Model only (skip image render)**
 - **Show getter/setter methods**
+- built-in **Diagram / Model** viewer tabs
+- diagram zoom and fit controls
+- light/dark theme toggle
+
+When **Model only** is enabled, the UI automatically locks **Show getter/setter methods** on so the generated PlantUML model includes accessor lines.
 
 <p align="right">
   (<a href="#readme-top">back to top</a>)
@@ -236,19 +241,17 @@ Current UI options include:
 
 ## 🎬 <a name="demo">Demo</a>
 
-### Terminal workflow
-
-The CLI demo is best shown as motion because the progress output is part of the product experience.
-
-![](./demo/images/demo.gif)
-
-<br />
-
 ### Local viewer UI
 
 The local UI is best shown as a crisp static image because screenshots preserve interface quality much better than GIFs.
 
 ![](./demo/images/ui-demo.png)
+
+### Terminal workflow
+
+The CLI demo is best shown as motion because the progress output is part of the product experience.
+
+![](./demo/images/demo.gif)
 
 <p align="right">
   (<a href="#readme-top">back to top</a>)
