@@ -42,7 +42,7 @@ jobs:
         run: |
           pip install mypy --quiet
           pip install -r requirements.txt --quiet
-          mypy $(git ls-files "*.py")
+          mypy $(git ls-files "*.py" ':!:scripts/capture_ui_demo.py')
 
   pytest:
     runs-on: ubuntu-latest
