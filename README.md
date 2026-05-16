@@ -235,6 +235,12 @@ Current UI options include:
 
 When **Model only** is enabled, the UI automatically locks **Show getter/setter methods** on so the generated PlantUML model includes accessor lines.
 
+A few interaction rules are also intentional:
+
+- **Load Demo Project** disables picker helpers until reset so the app stays in one input mode at a time
+- file-only helper selections disable **Recursive folder scan** because recursion only applies to folders
+- model-only runs automatically switch the viewer to the **Model** tab when no diagram artifact exists
+
 <p align="right">
   (<a href="#readme-top">back to top</a>)
 </p>
